@@ -2,6 +2,9 @@ package main
 
 import (
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/auyer/commanderBot/config"
 
@@ -16,6 +19,8 @@ func main() {
 	}
 
 	bot.Start()
-	<-make(chan struct{})
-	return
+	sc := make(chan os.Signal, 1)
+	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
+	<-sc
+	bot.Bot.Close()
 }

@@ -19,8 +19,9 @@ func main() {
 	}
 
 	bot.Start()
-	sc := make(chan os.Signal, 1)
-	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
-	<-sc
-	bot.Bot.Close()
+	defer bot.Close()
+	quit := make(chan os.Signal)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
+	<-quit
+
 }

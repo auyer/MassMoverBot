@@ -8,16 +8,18 @@ import (
 
 var (
 	// Public variables
-	Token     string
-	BotPrefix string
+	Token         string
+	BotPrefix     string
+	DatabasesPath string
 
 	// Private variables
 	config *configStruct
 )
 
 type configStruct struct {
-	Token     string `json:"Token"`
-	BotPrefix string `json:"BotPrefix"`
+	Token         string `json:"Token"`
+	BotPrefix     string `json:"BotPrefix"`
+	DatabasesPath string `json:"DatabasesPath"`
 }
 
 func ReadConfig() error {
@@ -41,6 +43,7 @@ func ReadConfig() error {
 
 	Token = config.Token
 	BotPrefix = config.BotPrefix
+	DatabasesPath = config.DatabasesPath
 
 	return nil
 }

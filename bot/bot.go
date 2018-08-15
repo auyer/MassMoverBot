@@ -3,19 +3,28 @@ package bot
 import (
 	"errors"
 	"log"
+	"os"
 	"sort"
 	"strconv"
 	"strings"
 
 	"github.com/auyer/commanderBot/config"
+	"github.com/auyer/commanderBot/db"
 	"github.com/bwmarrin/discordgo"
 )
 
 var BotID string
 var Bot *discordgo.Session
 
-func Start() {
+// var dbDict map[string]*badger.DB
 
+func Close() {
+	log.Println("Closing")
+	db.CloseDatabases()
+	// Bot.Close()
+}
+
+func Start() {
 	Bot, err := discordgo.New("Bot " + config.Token)
 
 	if err != nil {
@@ -33,6 +42,8 @@ func Start() {
 
 	Bot.AddHandler(ready)
 	Bot.AddHandler(messageHandler)
+	Bot.AddHandler(guildCreate)
+	Bot.AddHandler(guildDelete)
 
 	err = Bot.Open()
 
@@ -41,6 +52,7 @@ func Start() {
 		return
 	}
 
+	os.Mkdir(config.DatabasesPath, os.ModePerm)
 	log.Print("Bot is running!")
 
 }
@@ -48,6 +60,54 @@ func Start() {
 func ready(s *discordgo.Session, event *discordgo.Ready) {
 	// Set the playing status.
 	s.UpdateStatus(0, config.BotPrefix+" help")
+}
+
+// This function will be called (due to AddHandler above) every time a new
+// guild is joined.
+func guildCreate(s *discordgo.Session, event *discordgo.GuildCreate) {
+	log.Println("joined ! " + event.Guild.ID)
+
+	if event.Guild.Unavailable {
+		return
+	}
+	dbpointer, err := db.ConnectDB(config.DatabasesPath + event.Guild.ID)
+	if err != nil {
+		log.Println("Error creating guildDB " + err.Error())
+	}
+	db.PointerDict.Lock()
+	db.PointerDict.Dict[event.Guild.ID] = dbpointer
+	db.PointerDict.Unlock()
+
+	for _, channel := range event.Guild.Channels {
+		if channel.ID == event.Guild.ID {
+			_, _ = s.ChannelMessageSend(channel.ID, "Bot Joined!")
+			return
+		}
+	}
+}
+
+// This function will be called (due to AddHandler above) every time the bot
+// leaves a guild.
+func guildDelete(s *discordgo.Session, event *discordgo.GuildDelete) {
+
+	if event.Guild.Unavailable {
+		return
+	}
+	db.PointerDict.Lock()
+	dbp := db.PointerDict.Dict[event.Guild.ID]
+	// dbp2 := &dbp
+	dbp.Close()
+	delete(db.PointerDict.Dict, event.Guild.ID)
+	db.PointerDict.Unlock()
+
+	err := db.RemoveDatabase(config.DatabasesPath, event.Guild.ID)
+	if err != nil {
+		log.Println(err)
+	}
+	db.PointerDict.Lock()
+	delete(db.PointerDict.Dict, event.Guild.ID)
+	db.PointerDict.Unlock()
+
 }
 
 func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {

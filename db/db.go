@@ -28,6 +28,7 @@ var PointerDict = struct {
 func CloseDatabases() {
 	PointerDict.Lock()
 	for _, i := range PointerDict.Dict {
+		i.Lock()
 		err := i.Close()
 		if err != nil {
 			log.Println("[DB] " + err.Error())

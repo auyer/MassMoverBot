@@ -65,7 +65,7 @@ func ready(s *discordgo.Session, event *discordgo.Ready) {
 // This function will be called (due to AddHandler above) every time a new
 // guild is joined.
 func guildCreate(s *discordgo.Session, event *discordgo.GuildCreate) {
-	log.Println("joined ! " + event.Guild.ID)
+	log.Println("Joined " + event.Guild.ID)
 
 	if event.Guild.Unavailable {
 		return
@@ -94,9 +94,11 @@ func guildDelete(s *discordgo.Session, event *discordgo.GuildDelete) {
 		return
 	}
 	db.PointerDict.Lock()
+	db.PointerDict.Dict[event.Guild.ID].Lock()
 	dbp := db.PointerDict.Dict[event.Guild.ID]
 	// dbp2 := &dbp
 	dbp.Close()
+	db.PointerDict.Dict[event.Guild.ID].Unlock()
 	delete(db.PointerDict.Dict, event.Guild.ID)
 	db.PointerDict.Unlock()
 

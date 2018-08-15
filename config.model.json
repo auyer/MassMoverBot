@@ -1,4 +1,5 @@
 {
     "Token" : "Token",
-    "BotPrefix" : "~c"
+    "BotPrefix" : "~c",
+    "DatabasesPath" : "./databases/"
 }

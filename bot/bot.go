@@ -16,26 +16,30 @@ import (
 var BotID string
 var Bot *discordgo.Session
 
-// var dbDict map[string]*badger.DB
-
 func Close() {
 	log.Println("Closing")
 	db.CloseDatabases()
-	// Bot.Close()
+	Bot.Close()
 }
 
 func Start() {
 	Bot, err := discordgo.New("Bot " + config.Token)
-
 	if err != nil {
 		log.Println("Error creating Discord session: ", err)
 		return
 	}
 
 	u, err := Bot.User("@me")
-
 	if err != nil {
 		log.Println("Error creating Discord session: ", err)
+	}
+
+	if _, err := os.Stat(config.DatabasesPath); os.IsNotExist(err) {
+		err = os.Mkdir(config.DatabasesPath, os.ModePerm)
+		if err != nil && err.Error() != "file exists" {
+			log.Println("Error creating Databases folder: ", err)
+			return
+		}
 	}
 
 	BotID = u.ID
@@ -51,8 +55,6 @@ func Start() {
 		log.Println("Error creating Discord session: ", err)
 		return
 	}
-
-	os.Mkdir(config.DatabasesPath, os.ModePerm)
 	log.Print("Bot is running!")
 
 }
@@ -95,9 +97,7 @@ func guildDelete(s *discordgo.Session, event *discordgo.GuildDelete) {
 	}
 	db.PointerDict.Lock()
 	db.PointerDict.Dict[event.Guild.ID].Lock()
-	dbp := db.PointerDict.Dict[event.Guild.ID]
-	// dbp2 := &dbp
-	dbp.Close()
+	db.PointerDict.Dict[event.Guild.ID].Close()
 	db.PointerDict.Dict[event.Guild.ID].Unlock()
 	delete(db.PointerDict.Dict, event.Guild.ID)
 	db.PointerDict.Unlock()
@@ -106,9 +106,6 @@ func guildDelete(s *discordgo.Session, event *discordgo.GuildDelete) {
 	if err != nil {
 		log.Println(err)
 	}
-	db.PointerDict.Lock()
-	delete(db.PointerDict.Dict, event.Guild.ID)
-	db.PointerDict.Unlock()
 
 }
 

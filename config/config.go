@@ -7,11 +7,12 @@ import (
 )
 
 var (
-	// Public variables
-	Token         string
-	BotPrefix     string
+	// Token is the Discord API token used to connect
+	Token string
+	// BotPrefix is the string that shoud initiate a conversation with the bot
+	BotPrefix string
+	// DatabasesPath indicates the path where database files will be created
 	DatabasesPath string
-
 	// Private variables
 	config *configStruct
 )
@@ -22,6 +23,7 @@ type configStruct struct {
 	DatabasesPath string `json:"DatabasesPath"`
 }
 
+// ReadConfig function reads from the json file and stores the values
 func ReadConfig() error {
 	log.Print("Reading config file...")
 

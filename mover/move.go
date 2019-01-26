@@ -34,7 +34,7 @@ func Move(s *discordgo.Session, m *discordgo.MessageCreate, prefix string) {
 			log.Println(err.Error())
 		}
 	} else if length == 3 { // IF 3 parameters : Detect Author's Location
-		log.Println("Recieved 3 parameter move command on " + guild.Name + " , ID: " + guild.ID + " , by :" + m.Author.ID)
+		log.Println("Received 3 parameter move command on " + guild.Name + " , ID: " + guild.ID + " , by :" + m.Author.ID)
 		param2, err := strconv.Atoi(params[2])
 		var destination string
 		if err != nil {
@@ -62,7 +62,7 @@ func Move(s *discordgo.Session, m *discordgo.MessageCreate, prefix string) {
 		}
 		s.ChannelMessageSend(m.ChannelID, m.Author.Mention()+", you need to be connected to a channel for me to find you. Type '"+prefix+" move' to get help.")
 	} else if length == 4 { // IF 4 parameters: Move from Origin to Destination
-		log.Println("Recieved 4 parameter move command on " + guild.Name + " , ID: " + guild.ID + " , by :" + m.Author.ID)
+		log.Println("Received 4 parameter move command on " + guild.Name + " , ID: " + guild.ID + " , by :" + m.Author.ID)
 		var origin string
 		param2, err := strconv.Atoi(params[2])
 		if err != nil {
@@ -101,9 +101,8 @@ func Move(s *discordgo.Session, m *discordgo.MessageCreate, prefix string) {
 		}
 		s.ChannelMessageSend(m.ChannelID, "I Just moved "+num+" users for you.")
 		return
-	} else {
-		s.ChannelMessageSend(m.ChannelID, "Please, type '"+prefix+" move' to better understand this command.")
 	}
+	s.ChannelMessageSend(m.ChannelID, "Please, type '"+prefix+" move' to better understand this command.") // else (if ends with return)
 }
 
 // MoveMembers wraps MoveAndRetry with councurrent calls and error reporting.
@@ -134,7 +133,7 @@ Inputs: s *discordgo.Session : the session that called this handler
 		guildID string : the ID of the server (guild) where the request was originated
 		userID string : the ID of the user that is going to be moved
 		dest string : the ID of the Voice Channel the user will be moved to
-		retry int: the ammount of retrys this function will allows
+		retry int: the amount of retrys this function will allows
 */
 func MoveAndRetry(s *discordgo.Session, guildID, userID, dest string, retry int) {
 	err := s.GuildMemberMove(guildID, userID, dest)
@@ -170,7 +169,7 @@ func MoveHelper(channs []*discordgo.Channel, prefix string) string {
 	return message
 }
 
-// ChanByPosNum retrieves channel id by the possition as displayed in the channel.
+// ChanByPosNum retrieves channel id by the position as displayed in the channel.
 /*
 Inputs: chann []*discordgo.Channel : list of all channels in the server
 		posNum integer: numer (position) of the channel

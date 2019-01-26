@@ -1,4 +1,4 @@
-package bot
+package mover
 
 import (
 	"errors"
@@ -13,8 +13,8 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-// move function moves discord users
-func move(s *discordgo.Session, m *discordgo.MessageCreate, prefix string) {
+// Move function moves discord users
+func Move(s *discordgo.Session, m *discordgo.MessageCreate, prefix string) {
 	c, err := s.State.Channel(m.ChannelID) // retrieving the channel the message was read from
 	if err != nil {
 		log.Println(err.Error())

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/auyer/commanderBot/config"
+	"github.com/auyer/commanderBot/mover"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -119,7 +120,7 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			s.ChannelMessageSend(m.ChannelID, m.Author.Mention()+`, use `+config.BotPrefix+` to use all my commands !
 			`+config.BotPrefix+`  move : Use this command to move users from one Voice Channel to another ! Type  `+config.BotPrefix+` move for help`)
 		} else if strings.HasPrefix(m.Content, config.BotPrefix+" move") {
-			move(s, m, config.BotPrefix)
+			mover.Move(s, m, config.BotPrefix)
 		} else {
 			s.ChannelMessageSend(m.ChannelID, m.Author.Mention()+", you said "+m.Content+" ... ehh ?")
 		}

@@ -10,23 +10,26 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-var BotID string
-var Bot *discordgo.Session
+var botID string
+var bot *discordgo.Session
 
+// Close function ends the bot connection and closes its database
 func Close() {
 	log.Println("Closing")
 	db.CloseDatabases()
-	Bot.Close()
+	bot.Close()
 }
 
+// Start function connects and ads the necessary handlers
 func Start() {
-	Bot, err := discordgo.New("Bot " + config.Token)
+	var err error
+	bot, err = discordgo.New("Bot " + config.Token)
 	if err != nil {
 		log.Println("Error creating Discord session: ", err)
 		return
 	}
 
-	u, err := Bot.User("@me")
+	u, err := bot.User("@me")
 	if err != nil {
 		log.Println("Error creating Discord session: ", err)
 	}
@@ -39,14 +42,14 @@ func Start() {
 		}
 	}
 
-	BotID = u.ID
+	botID = u.ID
 
-	Bot.AddHandler(ready)
-	Bot.AddHandler(messageHandler)
-	Bot.AddHandler(guildCreate)
-	Bot.AddHandler(guildDelete)
+	bot.AddHandler(ready)
+	bot.AddHandler(messageHandler)
+	bot.AddHandler(guildCreate)
+	bot.AddHandler(guildDelete)
 
-	err = Bot.Open()
+	err = bot.Open()
 
 	if err != nil {
 		log.Println("Error creating Discord session: ", err)
@@ -64,7 +67,7 @@ func ready(s *discordgo.Session, event *discordgo.Ready) {
 // This function will be called (due to AddHandler above) every time a new
 // guild is joined.
 func guildCreate(s *discordgo.Session, event *discordgo.GuildCreate) {
-	log.Println("Joined " + event.Guild.ID)
+	log.Println("Joined " + event.Guild.ID + " (" + event.Guild.Name + ")")
 
 	if event.Guild.Unavailable {
 		return
@@ -85,8 +88,7 @@ func guildCreate(s *discordgo.Session, event *discordgo.GuildCreate) {
 	}
 }
 
-// This function will be called (due to AddHandler above) every time the bot
-// leaves a guild.
+// guildDelete function will be called every time the bot leaves a guild.
 func guildDelete(s *discordgo.Session, event *discordgo.GuildDelete) {
 
 	if event.Guild.Unavailable {
@@ -106,16 +108,17 @@ func guildDelete(s *discordgo.Session, event *discordgo.GuildDelete) {
 
 }
 
+// messageHandler function will be called when the bot reads a message
 func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if strings.HasPrefix(m.Content, config.BotPrefix) {
-		if m.Author.ID == BotID {
+		if m.Author.ID == botID {
 			return
 		}
-		if m.Content == config.BotPrefix+" help" {
+		if m.Content == config.BotPrefix || m.Content == config.BotPrefix+" help" {
 			s.ChannelMessageSend(m.ChannelID, m.Author.Mention()+`, use `+config.BotPrefix+` to use all my commands !
 			`+config.BotPrefix+`  move : Use this command to move users from one Voice Channel to another ! Type  `+config.BotPrefix+` move for help`)
 		} else if strings.HasPrefix(m.Content, config.BotPrefix+" move") {
-			move(s, m)
+			move(s, m, config.BotPrefix)
 		} else {
 			s.ChannelMessageSend(m.ChannelID, m.Author.Mention()+", you said "+m.Content+" ... ehh ?")
 		}

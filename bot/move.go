@@ -18,7 +18,7 @@ import (
 func move(s *discordgo.Session, m *discordgo.MessageCreate) {
 	c, err := s.State.Channel(m.ChannelID)
 	if err != nil {
-		log.Print(err.Error())
+		log.Println(err.Error())
 		return
 	}
 	guild, err := s.Guild(c.GuildID)
@@ -56,11 +56,11 @@ func move(s *discordgo.Session, m *discordgo.MessageCreate) {
 				if err != nil {
 					log.Println(err.Error())
 				}
-				log.Print(s.ChannelMessageSend(m.ChannelID, "I Just moved "+num+" users for you."))
+				s.ChannelMessageSend(m.ChannelID, "I Just moved "+num+" users for you.")
 				return
 			}
 		}
-		log.Print(s.ChannelMessageSend(m.ChannelID, m.Author.Mention()+", I you need to be connected to a channel for me to find you. Type '"+config.BotPrefix+" move' to get help."))
+		s.ChannelMessageSend(m.ChannelID, m.Author.Mention()+", I you need to be connected to a channel for me to find you. Type '"+config.BotPrefix+" move' to get help.")
 	} else if l == 4 { // IF 4 parameters: Move from Origin to Destination
 		var origin string
 		param2, err := strconv.Atoi(params[2])
@@ -95,10 +95,10 @@ func move(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		num, err := MoveMembers(s, guild, c.GuildID, origin, destination)
 		if err != nil {
-			log.Print(s.ChannelMessageSend(m.ChannelID, "Sorry, but: "+err.Error()))
+			s.ChannelMessageSend(m.ChannelID, "Sorry, but: "+err.Error())
 			log.Println(err.Error())
 		}
-		log.Print(s.ChannelMessageSend(m.ChannelID, "I Just moved "+num+" users for you."))
+		s.ChannelMessageSend(m.ChannelID, "I Just moved "+num+" users for you.")
 		return
 	} else {
 

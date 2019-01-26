@@ -52,7 +52,7 @@ func Start() {
 		log.Println("Error creating Discord session: ", err)
 		return
 	}
-	log.Print("Bot is running!")
+	log.Println("Bot is running!")
 
 }
 
@@ -112,12 +112,12 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 		if m.Content == config.BotPrefix+" help" {
-			log.Print(s.ChannelMessageSend(m.ChannelID, m.Author.Mention()+`, use `+config.BotPrefix+` to use all my commands !
-			`+config.BotPrefix+`  move : Use this command to move users from one Voice Channel to another ! Type  `+config.BotPrefix+` move for help`))
+			s.ChannelMessageSend(m.ChannelID, m.Author.Mention()+`, use `+config.BotPrefix+` to use all my commands !
+			`+config.BotPrefix+`  move : Use this command to move users from one Voice Channel to another ! Type  `+config.BotPrefix+` move for help`)
 		} else if strings.HasPrefix(m.Content, config.BotPrefix+" move") {
 			move(s, m)
 		} else {
-			log.Print(s.ChannelMessageSend(m.ChannelID, m.Author.Mention()+", you said "+m.Content+" ... ehh ?"))
+			s.ChannelMessageSend(m.ChannelID, m.Author.Mention()+", you said "+m.Content+" ... ehh ?")
 		}
 	}
 }

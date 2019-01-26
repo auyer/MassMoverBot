@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/auyer/commanderBot/config"
-	"github.com/auyer/commanderBot/db"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -16,7 +15,7 @@ var bot *discordgo.Session
 // Close function ends the bot connection and closes its database
 func Close() {
 	log.Println("Closing")
-	db.CloseDatabases()
+	// db.CloseDatabases()
 	bot.Close()
 }
 
@@ -72,13 +71,15 @@ func guildCreate(s *discordgo.Session, event *discordgo.GuildCreate) {
 	if event.Guild.Unavailable {
 		return
 	}
-	dbpointer, err := db.ConnectDB(config.DatabasesPath + event.Guild.ID)
-	if err != nil {
+	// Database functionality not in use
+	/* dbpointer, err := db.ConnectDB(config.DatabasesPath + event.Guild.ID)
+	 if err != nil {
 		log.Println("Error creating guildDB " + err.Error())
 	}
 	db.PointerDict.Lock()
 	db.PointerDict.Dict[event.Guild.ID] = dbpointer
 	db.PointerDict.Unlock()
+	*/
 
 	for _, channel := range event.Guild.Channels {
 		if channel.ID == event.Guild.ID {
@@ -94,17 +95,17 @@ func guildDelete(s *discordgo.Session, event *discordgo.GuildDelete) {
 	if event.Guild.Unavailable {
 		return
 	}
-	db.PointerDict.Lock()
-	db.PointerDict.Dict[event.Guild.ID].Lock()
-	db.PointerDict.Dict[event.Guild.ID].Close()
-	db.PointerDict.Dict[event.Guild.ID].Unlock()
-	delete(db.PointerDict.Dict, event.Guild.ID)
-	db.PointerDict.Unlock()
+	// db.PointerDict.Lock()
+	// db.PointerDict.Dict[event.Guild.ID].Lock()
+	// db.PointerDict.Dict[event.Guild.ID].Close()
+	// db.PointerDict.Dict[event.Guild.ID].Unlock()
+	// delete(db.PointerDict.Dict, event.Guild.ID)
+	// db.PointerDict.Unlock()
 
-	err := db.RemoveDatabase(config.DatabasesPath, event.Guild.ID)
-	if err != nil {
-		log.Println(err)
-	}
+	// err := db.RemoveDatabase(config.DatabasesPath, event.Guild.ID)
+	// if err != nil {
+	// 	log.Println(err)
+	// }
 
 }
 

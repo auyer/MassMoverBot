@@ -129,11 +129,12 @@ func MoveMembers(s *discordgo.Session, guild *discordgo.Guild, id string, origin
 // MoveAndRetry is a wrapper on top of discordgo.Session.GuildMemberMove with a retry function
 // ChanByName retrieves channel id by name. The comparison is case insensitive.
 /*
-Inputs: s *discordgo.Session : the session that called this handler
-		guildID string : the ID of the server (guild) where the request was originated
-		userID string : the ID of the user that is going to be moved
-		dest string : the ID of the Voice Channel the user will be moved to
-		retry int: the amount of retrys this function will allows
+Inputs:
+	s *discordgo.Session : the session that called this handler
+	guildID string : the ID of the server (guild) where the request was originated
+	userID string : the ID of the user that is going to be moved
+	dest string : the ID of the Voice Channel the user will be moved to
+	retry int: the amount of retrys this function will allows
 */
 func MoveAndRetry(s *discordgo.Session, guildID, userID, dest string, retry int) {
 	err := s.GuildMemberMove(guildID, userID, dest)
@@ -149,8 +150,9 @@ func MoveAndRetry(s *discordgo.Session, guildID, userID, dest string, retry int)
 
 // MoveHelper prints the help text for this command
 /*
-Inputs: chann []*discordgo.Channel : list of all channels in the server (used to list the numbers)
-		prefix string: prefix used to call the bot (used to print in the message)
+Inputs:
+	chann []*discordgo.Channel : list of all channels in the server (used to list the numbers)
+	prefix string: prefix used to call the bot (used to print in the message)
 
 Outputs: message string
 */
@@ -171,8 +173,9 @@ func MoveHelper(channs []*discordgo.Channel, prefix string) string {
 
 // ChanByPosNum retrieves channel id by the position as displayed in the channel.
 /*
-Inputs: chann []*discordgo.Channel : list of all channels in the server
-		posNum integer: numer (position) of the channel
+Inputs:
+	chann []*discordgo.Channel : list of all channels in the server
+	posNum integer: numer (position) of the channel
 
 Outputs: id string, error
 */
@@ -191,8 +194,9 @@ func ChanByPosNum(channs []*discordgo.Channel, posNum int) (string, error) {
 
 // ChanByName retrieves channel id by name. The comparison is case insensitive.
 /*
-Inputs: chann []*discordgo.Channel : list of all channels in the server
-		name string: name of the desired channel
+Inputs:
+	chann []*discordgo.Channel : list of all channels in the server
+	name string: name of the desired channel
 
 Outputs: id string, error
 */

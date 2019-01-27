@@ -32,7 +32,6 @@ func Move(s *discordgo.Session, m *discordgo.MessageCreate, prefix string) {
 		param2, err := strconv.Atoi(params[2])
 		var destination string
 		if err != nil {
-			err = nil
 			destination, err = ChanByName(channs, params[2])
 		} else {
 			destination, err = ChanByPosNum(channs, param2)
@@ -58,7 +57,6 @@ func Move(s *discordgo.Session, m *discordgo.MessageCreate, prefix string) {
 		var origin string
 		param2, err := strconv.Atoi(params[2])
 		if err != nil {
-			err = nil
 			origin, err = ChanByName(channs, params[2])
 		} else {
 			origin, err = ChanByPosNum(channs, param2)
@@ -70,7 +68,6 @@ func Move(s *discordgo.Session, m *discordgo.MessageCreate, prefix string) {
 		param3, err := strconv.Atoi(params[3])
 		var destination string
 		if err != nil {
-			err = nil
 			destination, err = ChanByName(channs, params[3])
 		} else {
 			destination, err = ChanByPosNum(channs, param3)

@@ -38,17 +38,14 @@ func Move(s *discordgo.Session, m *discordgo.MessageCreate, prefix string) {
 		param2, err := strconv.Atoi(params[2])
 		var destination string
 		if err != nil {
+			err = nil
 			destination, err = ChanByName(channs, params[2])
-			if err != nil {
-				s.ChannelMessageSend(m.ChannelID, "Sorry, I can't find channel "+params[2]+".")
-				return
-			}
 		} else {
 			destination, err = ChanByPosNum(channs, param2)
-			if err != nil {
-				s.ChannelMessageSend(m.ChannelID, "Sorry, I can't find channel "+params[2]+".")
-				return
-			}
+		}
+		if err != nil {
+			s.ChannelMessageSend(m.ChannelID, "Sorry, I can't find channel "+params[2]+".")
+			return
 		}
 		for _, member := range guild.VoiceStates {
 			if member.UserID == m.Author.ID {
@@ -66,32 +63,26 @@ func Move(s *discordgo.Session, m *discordgo.MessageCreate, prefix string) {
 		var origin string
 		param2, err := strconv.Atoi(params[2])
 		if err != nil {
+			err = nil
 			origin, err = ChanByName(channs, params[2])
-			if err != nil {
-				s.ChannelMessageSend(m.ChannelID, "Sorry, I can't find channel "+params[2]+".")
-				return
-			}
 		} else {
 			origin, err = ChanByPosNum(channs, param2)
-			if err != nil {
-				s.ChannelMessageSend(m.ChannelID, "Sorry, I can't find channel "+params[2]+".")
-				return
-			}
+		}
+		if err != nil {
+			s.ChannelMessageSend(m.ChannelID, "Sorry, I can't find channel "+params[2]+".")
+			return
 		}
 		param3, err := strconv.Atoi(params[3])
 		var destination string
 		if err != nil {
+			err = nil
 			destination, err = ChanByName(channs, params[3])
-			if err != nil {
-				s.ChannelMessageSend(m.ChannelID, "Sorry, I can't find channel "+params[3]+".")
-				return
-			}
 		} else {
 			destination, err = ChanByPosNum(channs, param3)
-			if err != nil {
-				s.ChannelMessageSend(m.ChannelID, "Sorry, I can't find channel "+params[3]+".")
-				return
-			}
+		}
+		if err != nil {
+			s.ChannelMessageSend(m.ChannelID, "Sorry, I can't find channel "+params[3]+".")
+			return
 		}
 
 		num, err := MoveMembers(s, guild, c.GuildID, origin, destination)
@@ -106,6 +97,13 @@ func Move(s *discordgo.Session, m *discordgo.MessageCreate, prefix string) {
 }
 
 // MoveMembers wraps MoveAndRetry with councurrent calls and error reporting.
+/*
+Inputs:
+	s *discordgo.Session : the session that called this handler
+	guildID string : the ID of the server (guild) where the request was originated
+	userID string : the ID of the user that is going to be moved
+	dest string : the ID of the Voice Channel the user will be moved to
+*/
 func MoveMembers(s *discordgo.Session, guild *discordgo.Guild, id string, origin string, dest string) (string, error) {
 	if origin == dest {
 		return "", errors.New("destination and origin are the same")
@@ -127,7 +125,6 @@ func MoveMembers(s *discordgo.Session, guild *discordgo.Guild, id string, origin
 }
 
 // MoveAndRetry is a wrapper on top of discordgo.Session.GuildMemberMove with a retry function
-// ChanByName retrieves channel id by name. The comparison is case insensitive.
 /*
 Inputs:
 	s *discordgo.Session : the session that called this handler
@@ -157,7 +154,7 @@ Inputs:
 Outputs: message string
 */
 func MoveHelper(channs []*discordgo.Channel, prefix string) string {
-	message := " You may use the bot with the following commands:\n\nView this help and the list of available channels\n\t" + prefix + " move\n\nMove all users from your channel to the <integer:destination channel>\n\t" + prefix + " move <number:destination channel>\n\nMove all users from <integer:origin channel> to the <integer:destination channel>\n\t" + prefix + " move <number:origin channel> <number:destination channel>\n\nList of available channels:\n"
+	message := `View this help and the list of available channels\n\t" + prefix + " move\n\nMove all users from your channel to the <integer:destination channel>\n\t" + prefix + " move <number:destination channel>\n\nMove all users from <integer:origin channel> to the <integer:destination channel>\n\t" + prefix + " move <number:origin channel> <number:destination channel>\n\nList of available channels:\n`
 	sort.Slice(channs[:], func(i, j int) bool {
 		return channs[i].Position < channs[j].Position
 	})
@@ -201,9 +198,10 @@ Inputs:
 Outputs: id string, error
 */
 func ChanByName(channs []*discordgo.Channel, name string) (string, error) {
+	name = strings.ToUpper(name)
 	for _, chann := range channs {
 		if chann.Type == 2 {
-			if strings.ToUpper(chann.Name) == strings.ToUpper(name) {
+			if strings.ToUpper(chann.Name) == name {
 				return chann.ID, nil
 			}
 		}

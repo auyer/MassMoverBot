@@ -27,13 +27,7 @@ func Move(s *discordgo.Session, m *discordgo.MessageCreate, prefix string) {
 	})
 	params := strings.Split(m.Content, " ") // spliting the user request
 	length := len(params)
-	if length == 2 { // IF 2 parameters: Get Help message
-		log.Println("Sending help message on " + guild.Name + " , ID: " + guild.ID)
-		_, err := s.ChannelMessageSend(m.ChannelID, m.Author.Mention()+MoveHelper(channs, prefix))
-		if err != nil {
-			log.Println(err.Error())
-		}
-	} else if length == 3 { // IF 3 parameters : Detect Author's Location
+	if length == 3 { // IF 3 parameters : Detect Author's Location
 		log.Println("Received 3 parameter move command on " + guild.Name + " , ID: " + guild.ID + " , by :" + m.Author.ID)
 		param2, err := strconv.Atoi(params[2])
 		var destination string
@@ -52,6 +46,7 @@ func Move(s *discordgo.Session, m *discordgo.MessageCreate, prefix string) {
 				num, err := MoveMembers(s, guild, c.GuildID, member.ChannelID, destination)
 				if err != nil {
 					log.Println(err.Error())
+					return
 				}
 				s.ChannelMessageSend(m.ChannelID, "I Just moved "+num+" users for you.")
 				return
@@ -84,7 +79,6 @@ func Move(s *discordgo.Session, m *discordgo.MessageCreate, prefix string) {
 			s.ChannelMessageSend(m.ChannelID, "Sorry, I can't find channel "+params[3]+".")
 			return
 		}
-
 		num, err := MoveMembers(s, guild, c.GuildID, origin, destination)
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, "Sorry, but: "+err.Error())
@@ -93,7 +87,11 @@ func Move(s *discordgo.Session, m *discordgo.MessageCreate, prefix string) {
 		s.ChannelMessageSend(m.ChannelID, "I Just moved "+num+" users for you.")
 		return
 	}
-	s.ChannelMessageSend(m.ChannelID, "Please, type '"+prefix+" move' to better understand this command.") // else (if ends with return)
+	log.Println("Sending help message on " + guild.Name + " , ID: " + guild.ID)
+	_, err = s.ChannelMessageSend(m.ChannelID, m.Author.Mention()+MoveHelper(channs, prefix))
+	if err != nil {
+		log.Println(err.Error())
+	}
 }
 
 // MoveMembers wraps MoveAndRetry with councurrent calls and error reporting.

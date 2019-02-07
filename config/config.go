@@ -7,31 +7,33 @@ import (
 )
 
 var (
-	// Token is the Discord API token used to connect
-	Token string
+	// ServantTokens is the Discord API token used to connect
+	ServantTokens []string
 	// BotPrefix is the string that shoud initiate a conversation with the bot
 	BotPrefix string
 	// DatabasesPath indicates the path where database files will be created
 	DatabasesPath string
 	// Private variables
-	config *configStruct
+	config *ConfigurationStruct
 )
 
-type configStruct struct {
-	Token         string `json:"Token"`
-	BotPrefix     string `json:"BotPrefix"`
-	DatabasesPath string `json:"DatabasesPath"`
+type ConfigurationStruct struct {
+	CommanderToken string   `json:"CommanderToken"`
+	ServantTokens  []string `json:"ServantTokens"`
+	BotPrefix      string   `json:"BotPrefix"`
+	DatabasesPath  string   `json:"DatabasesPath"`
 }
 
 // ReadConfig function reads from the json file and stores the values
-func ReadConfig() error {
+func ReadConfig() (*ConfigurationStruct, error) {
+	var config *ConfigurationStruct
 	log.Print("Reading config file...")
 
 	file, err := ioutil.ReadFile("./config.json")
 
 	if err != nil {
 		log.Print(err.Error())
-		return err
+		return config, err
 	}
 
 	log.Print(string(file))
@@ -40,12 +42,12 @@ func ReadConfig() error {
 
 	if err != nil {
 		log.Print(err.Error())
-		return err
+		return nil, err
 	}
 
-	Token = config.Token
+	ServantTokens = config.ServantTokens
 	BotPrefix = config.BotPrefix
 	DatabasesPath = config.DatabasesPath
 
-	return nil
+	return config, nil
 }

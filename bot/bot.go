@@ -1,56 +1,83 @@
 package bot
 
 import (
+	"fmt"
 	"log"
-	"os"
 	"strings"
 
-	"github.com/auyer/commanderBot/config"
 	"github.com/auyer/commanderBot/mover"
 	"github.com/bwmarrin/discordgo"
 )
 
-var botID string
-var bot *discordgo.Session
+var commanderID string
+var commander *discordgo.Session
+var servantList []*discordgo.Session
+var BotPrefix string
 
 // Close function ends the bot connection and closes its database
 func Close() {
 	log.Println("Closing")
 	// db.CloseDatabases()
-	bot.Close()
+	commander.Close()
+	for _, servant := range servantList {
+		servant.Close()
+	}
+}
+
+func setupBot(bot *discordgo.Session) (string, error) {
+
+	bot.AddHandler(ready)
+	bot.AddHandler(guildCreate)
+	bot.AddHandler(guildDelete)
+	u, err := commander.User("@me")
+	if err != nil {
+		log.Println("Error creating Discord session: ", err)
+		return "", err
+	}
+	return u.ID, nil
 }
 
 // Start function connects and ads the necessary handlers
-func Start() {
+func Start(commanderToken string, servantTokens []string, botPrefix string) {
+	BotPrefix = botPrefix
 	var err error
-	bot, err = discordgo.New("Bot " + config.Token)
+	commander, err = discordgo.New("Bot " + commanderToken)
+	for _, servantToken := range servantTokens {
+		servant, err := discordgo.New("Bot " + servantToken)
+		if err != nil {
+			log.Println("Error creating Discord session: ", err)
+			return
+		}
+		setupBot(servant)
+		// servant.AddHandler(servantTest)
+		servantList = append(servantList, servant)
+
+	}
+
+	// if _, err := os.Stat(config.DatabasesPath); os.IsNotExist(err) {
+	// 	err = os.Mkdir(config.DatabasesPath, os.ModePerm)
+	// 	if err != nil && err.Error() != "file exists" {
+	// 		log.Println("Error creating Databases folder: ", err)
+	// 		return
+	// 	}
+	// }
+
+	commanderID, err = setupBot(commander)
 	if err != nil {
 		log.Println("Error creating Discord session: ", err)
 		return
 	}
 
-	u, err := bot.User("@me")
-	if err != nil {
-		log.Println("Error creating Discord session: ", err)
-	}
+	commander.AddHandler(messageHandler)
 
-	if _, err := os.Stat(config.DatabasesPath); os.IsNotExist(err) {
-		err = os.Mkdir(config.DatabasesPath, os.ModePerm)
-		if err != nil && err.Error() != "file exists" {
-			log.Println("Error creating Databases folder: ", err)
-			return
+	for _, s := range servantList {
+		err = s.Open()
+		if err != nil {
+			fmt.Println("Error Opening Bot: ", err)
 		}
 	}
 
-	botID = u.ID
-
-	bot.AddHandler(ready)
-	bot.AddHandler(messageHandler)
-	bot.AddHandler(guildCreate)
-	bot.AddHandler(guildDelete)
-
-	err = bot.Open()
-
+	err = commander.Open()
 	if err != nil {
 		log.Println("Error creating Discord session: ", err)
 		return
@@ -61,13 +88,13 @@ func Start() {
 
 func ready(s *discordgo.Session, event *discordgo.Ready) {
 	// Set the playing status.
-	s.UpdateStatus(0, config.BotPrefix+" help")
+	s.UpdateStatus(0, BotPrefix+" help")
 }
 
 // This function will be called (due to AddHandler above) every time a new
 // guild is joined.
 func guildCreate(s *discordgo.Session, event *discordgo.GuildCreate) {
-	log.Println("Joined " + event.Guild.ID + " (" + event.Guild.Name + ")")
+	log.Println("Joined " + event.Guild.Name + " (" + event.Guild.ID + ")")
 
 	if event.Guild.Unavailable {
 		return
@@ -112,17 +139,28 @@ func guildDelete(s *discordgo.Session, event *discordgo.GuildDelete) {
 
 // messageHandler function will be called when the bot reads a message
 func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
-	if strings.HasPrefix(m.Content, config.BotPrefix) {
-		if m.Author.ID == botID {
+	if strings.HasPrefix(m.Content, BotPrefix) {
+		if m.Author.ID == commanderID {
 			return
 		}
-		if m.Content == config.BotPrefix || m.Content == config.BotPrefix+" help" {
-			s.ChannelMessageSend(m.ChannelID, m.Author.Mention()+`, use `+config.BotPrefix+` to use all my commands !
-			`+config.BotPrefix+`  move : Use this command to move users from one Voice Channel to another ! Type  `+config.BotPrefix+` move for help`)
-		} else if strings.HasPrefix(m.Content, config.BotPrefix+" move") {
-			mover.Move(s, m, config.BotPrefix)
+		if m.Content == BotPrefix || m.Content == BotPrefix+" help" {
+			s.ChannelMessageSend(m.ChannelID, m.Author.Mention()+`, use `+BotPrefix+` to use all my commands !
+			`+BotPrefix+`  move : Use this command to move users from one Voice Channel to another ! Type  `+BotPrefix+` move for help`)
+		} else if strings.HasPrefix(m.Content, BotPrefix+" move") {
+			// s.UserChannelPermissions(m.Author.ID,m.Author.)
+			mover.Move(s, servantList, m, BotPrefix)
 		} else {
 			s.ChannelMessageSend(m.ChannelID, m.Author.Mention()+", you said "+m.Content+" ... ehh ?")
 		}
 	}
 }
+
+// servantTest function will be called when the bot reads a message
+// func servantTest(s *discordgo.Session, m *discordgo.MessageCreate) {
+// 	if strings.HasPrefix(m.Content, BotPrefix+"s") {
+// 		if m.Author.ID == commanderID {
+// 			return
+// 		}
+// 		s.ChannelMessageSend(m.ChannelID, m.Author.Mention()+" Sir yes sir !")
+// 	}
+// }

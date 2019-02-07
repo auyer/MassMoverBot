@@ -14,7 +14,8 @@ import (
 )
 
 // Move function moves discord users
-func Move(s *discordgo.Session, m *discordgo.MessageCreate, prefix string) {
+func Move(s *discordgo.Session, servants []*discordgo.Session, m *discordgo.MessageCreate, prefix string) {
+	servants = append(servants, s)
 	c, err := s.State.Channel(m.ChannelID) // retrieving the channel the message was read from
 	if err != nil {
 		log.Println(err.Error())
@@ -42,7 +43,7 @@ func Move(s *discordgo.Session, m *discordgo.MessageCreate, prefix string) {
 		}
 		for _, member := range guild.VoiceStates {
 			if member.UserID == m.Author.ID {
-				num, err := MoveMembers(s, guild, c.GuildID, member.ChannelID, destination)
+				num, err := MoveMembers(servants, guild, c.GuildID, member.ChannelID, destination)
 				if err != nil {
 					log.Println(err.Error())
 					return
@@ -76,7 +77,7 @@ func Move(s *discordgo.Session, m *discordgo.MessageCreate, prefix string) {
 			s.ChannelMessageSend(m.ChannelID, "Sorry, I can't find channel "+params[3]+".")
 			return
 		}
-		num, err := MoveMembers(s, guild, c.GuildID, origin, destination)
+		num, err := MoveMembers(servants, guild, c.GuildID, origin, destination)
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, "Sorry, but: "+err.Error())
 			log.Println(err.Error())
@@ -99,19 +100,19 @@ Inputs:
 	userID string : the ID of the user that is going to be moved
 	dest string : the ID of the Voice Channel the user will be moved to
 */
-func MoveMembers(s *discordgo.Session, guild *discordgo.Guild, id string, origin string, dest string) (string, error) {
+func MoveMembers(s []*discordgo.Session, guild *discordgo.Guild, id string, origin string, dest string) (string, error) {
 	if origin == dest {
 		return "", errors.New("destination and origin are the same")
 	}
 	num := 0
 	var wg sync.WaitGroup
-	for _, member := range guild.VoiceStates {
+	for index, member := range guild.VoiceStates {
 		if member.ChannelID == origin {
 			wg.Add(1)
 			go func(id, UserID, dest string) {
 				num++
 				defer wg.Done()
-				MoveAndRetry(s, id, UserID, dest, 3)
+				MoveAndRetry(s[index%len(s)], id, UserID, dest, 3)
 			}(id, member.UserID, dest)
 		}
 	}
@@ -130,6 +131,7 @@ Inputs:
 */
 func MoveAndRetry(s *discordgo.Session, guildID, userID, dest string, retry int) {
 	err := s.GuildMemberMove(guildID, userID, dest)
+	fmt.Println(s.Token)
 	if err != nil {
 		time.Sleep(time.Millisecond * 10)
 		if retry >= 0 {

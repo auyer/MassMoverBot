@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"os"
 	"os/signal"
@@ -12,7 +13,10 @@ import (
 )
 
 func main() {
-	config, err := config.ReadConfig()
+	configFile := flag.String("config", "./config.json", "Configuration File Location")
+	flag.Parse()
+
+	config, err := config.ReadConfig(*configFile)
 	if err != nil {
 		log.Print(err.Error())
 		return

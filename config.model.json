@@ -1,6 +1,6 @@
 {
     "CommanderToken" : "commanderToken",
-    "ServantTokens" : ["serventToken", "serventToken2"],
-    "BotPrefix" : "~c",
+    "ServantTokens" : ["servantToken1", "servantToken2"],
+    "BotPrefix" : "-c",
     "DatabasesPath" : "./databases/"
 }

@@ -17,6 +17,7 @@ var (
 	config *ConfigurationStruct
 )
 
+// ConfigurationStruct stores the necessary info for a Multi Token bot
 type ConfigurationStruct struct {
 	CommanderToken string   `json:"CommanderToken"`
 	ServantTokens  []string `json:"ServantTokens"`
@@ -25,11 +26,11 @@ type ConfigurationStruct struct {
 }
 
 // ReadConfig function reads from the json file and stores the values
-func ReadConfig() (*ConfigurationStruct, error) {
+func ReadConfig(configFileLocation string) (*ConfigurationStruct, error) {
 	var config *ConfigurationStruct
 	log.Print("Reading config file...")
 
-	file, err := ioutil.ReadFile("./config.json")
+	file, err := ioutil.ReadFile(configFileLocation)
 
 	if err != nil {
 		log.Print(err.Error())

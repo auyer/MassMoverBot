@@ -15,13 +15,9 @@ import (
 
 // Move function moves discord users
 func Move(s *discordgo.Session, servants []*discordgo.Session, m *discordgo.MessageCreate, prefix string) {
+
 	servants = append(servants, s)
-	c, err := s.State.Channel(m.ChannelID) // retrieving the channel the message was read from
-	if err != nil {
-		log.Println(err.Error())
-		return
-	}
-	guild, err := s.Guild(c.GuildID) // retrieving the server (guild) the message was originated from
+	guild, err := s.Guild(m.GuildID) // retrieving the server (guild) the message was originated from
 	channs := guild.Channels         // retrieving the list of channels and sorting (next line) them by position (in the users interface)
 	sort.Slice(channs[:], func(i, j int) bool {
 		return channs[i].Position < channs[j].Position
@@ -43,7 +39,7 @@ func Move(s *discordgo.Session, servants []*discordgo.Session, m *discordgo.Mess
 		}
 		for _, member := range guild.VoiceStates {
 			if member.UserID == m.Author.ID {
-				num, err := MoveMembers(servants, guild, c.GuildID, member.ChannelID, destination)
+				num, err := MoveMembers(servants, guild, m.GuildID, member.ChannelID, destination)
 				if err != nil {
 					log.Println(err.Error())
 					return
@@ -77,7 +73,7 @@ func Move(s *discordgo.Session, servants []*discordgo.Session, m *discordgo.Mess
 			s.ChannelMessageSend(m.ChannelID, "Sorry, I can't find channel "+params[3]+".")
 			return
 		}
-		num, err := MoveMembers(servants, guild, c.GuildID, origin, destination)
+		num, err := MoveMembers(servants, guild, m.GuildID, origin, destination)
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, "Sorry, but: "+err.Error())
 			log.Println(err.Error())
@@ -204,4 +200,8 @@ func ChanByName(channs []*discordgo.Channel, name string) (string, error) {
 		}
 	}
 	return "", errors.New("Not Found")
+}
+
+func checkPermissions(channelId string, permission int) {
+
 }

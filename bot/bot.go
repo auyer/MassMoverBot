@@ -108,13 +108,6 @@ func guildCreate(s *discordgo.Session, event *discordgo.GuildCreate) {
 	db.PointerDict.Dict[event.Guild.ID] = dbpointer
 	db.PointerDict.Unlock()
 	*/
-
-	for _, channel := range event.Guild.Channels {
-		if channel.ID == event.Guild.ID {
-			_, _ = s.ChannelMessageSend(channel.ID, "Bot Joined!")
-			return
-		}
-	}
 }
 
 // guildDelete function will be called every time the bot leaves a guild.

@@ -15,8 +15,14 @@ import (
 
 // Move function moves discord users
 func Move(s *discordgo.Session, servants []*discordgo.Session, m *discordgo.MessageCreate, prefix string) {
-
-	servants = append(servants, s)
+	workers := []*discordgo.Session{}
+	for _, servant := range servants {
+		_, err := servant.State.Guild(m.GuildID)
+		if err == nil {
+			workers = append(workers, servant)
+		}
+	}
+	workers = append(workers, s)
 	guild, err := s.Guild(m.GuildID) // retrieving the server (guild) the message was originated from
 	channs := guild.Channels         // retrieving the list of channels and sorting (next line) them by position (in the users interface)
 	sort.Slice(channs[:], func(i, j int) bool {
@@ -37,10 +43,12 @@ func Move(s *discordgo.Session, servants []*discordgo.Session, m *discordgo.Mess
 			s.ChannelMessageSend(m.ChannelID, "Sorry, I can't find channel "+params[2]+".")
 			return
 		}
+		// CHECK PERMISSIONS
 		for _, member := range guild.VoiceStates {
 			if member.UserID == m.Author.ID {
-				num, err := MoveMembers(servants, guild, m.GuildID, member.ChannelID, destination)
+				num, err := MoveMembers(workers, guild, m.GuildID, member.ChannelID, destination)
 				if err != nil {
+					s.ChannelMessageSend(m.ChannelID, "Sorry, but: "+err.Error())
 					log.Println(err.Error())
 					return
 				}
@@ -73,10 +81,12 @@ func Move(s *discordgo.Session, servants []*discordgo.Session, m *discordgo.Mess
 			s.ChannelMessageSend(m.ChannelID, "Sorry, I can't find channel "+params[3]+".")
 			return
 		}
-		num, err := MoveMembers(servants, guild, m.GuildID, origin, destination)
+		// CHECK PERMISSIONS
+		num, err := MoveMembers(workers, guild, m.GuildID, origin, destination)
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, "Sorry, but: "+err.Error())
 			log.Println(err.Error())
+			return
 		}
 		s.ChannelMessageSend(m.ChannelID, "I Just moved "+num+" users for you.")
 		return
@@ -96,7 +106,7 @@ Inputs:
 	userID string : the ID of the user that is going to be moved
 	dest string : the ID of the Voice Channel the user will be moved to
 */
-func MoveMembers(s []*discordgo.Session, guild *discordgo.Guild, id string, origin string, dest string) (string, error) {
+func MoveMembers(servants []*discordgo.Session, guild *discordgo.Guild, id string, origin string, dest string) (string, error) {
 	if origin == dest {
 		return "", errors.New("destination and origin are the same")
 	}
@@ -105,11 +115,15 @@ func MoveMembers(s []*discordgo.Session, guild *discordgo.Guild, id string, orig
 	for index, member := range guild.VoiceStates {
 		if member.ChannelID == origin {
 			wg.Add(1)
-			go func(id, UserID, dest string) {
-				num++
+			go func(id, userID, dest string, worker *discordgo.Session) {
 				defer wg.Done()
-				MoveAndRetry(s[index%len(s)], id, UserID, dest, 3)
-			}(id, member.UserID, dest)
+				err := MoveAndRetry(worker, id, userID, dest, 3)
+				if err != nil {
+					log.Println("Failed to move user with ID: "+userID, err)
+				}
+				// worker.ChannelMessageSend(m)
+			}(id, member.UserID, dest, servants[index%len(servants)])
+			num++
 		}
 	}
 	wg.Wait()
@@ -125,17 +139,16 @@ Inputs:
 	dest string : the ID of the Voice Channel the user will be moved to
 	retry int: the amount of retrys this function will allows
 */
-func MoveAndRetry(s *discordgo.Session, guildID, userID, dest string, retry int) {
+func MoveAndRetry(s *discordgo.Session, guildID, userID, dest string, retry int) error {
 	err := s.GuildMemberMove(guildID, userID, dest)
-	fmt.Println(s.Token)
 	if err != nil {
-		time.Sleep(time.Millisecond * 10)
+		time.Sleep(time.Millisecond * 30)
 		if retry >= 0 {
-			log.Println("Failed to move user with ID: " + userID)
-			return
+			return err
 		}
 		MoveAndRetry(s, guildID, userID, dest, retry-1)
 	}
+	return nil
 }
 
 // MoveHelper prints the help text for this command
@@ -202,6 +215,7 @@ func ChanByName(channs []*discordgo.Channel, name string) (string, error) {
 	return "", errors.New("Not Found")
 }
 
-func checkPermissions(channelId string, permission int) {
-
-}
+// func checkPermissions(channelId string, permission int) {
+// 	// discordgo.PermissionVoiceMoveMembers
+// 	discordgo.PermissionOverwrite()
+// }

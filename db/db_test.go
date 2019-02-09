@@ -38,7 +38,7 @@ func TestDatabase(t *testing.T) {
 	if err != nil {
 		t.Errorf("Unable to Fetch Tuple")
 	}
-	testValues := []Endpoint{Endpoint{testKey, testValue}}
+	testValues := []Endpoint{{testKey, testValue}}
 	if values[0] != testValues[0] {
 		t.Errorf("Received Value not mathing with what was inserted.")
 	}

@@ -14,7 +14,8 @@ Get your Discord Bot tokens (at least one) in the [official developers portal](h
 The first one should be in the "CommanderToken" slot in the config file.
 The rest will be the servant Tokens, and should be added in a List.
 
-The Permission integer must be 16780288 (Move, Read messages, and Write messages).
+The Permission integer for the commander must be 16780288 (Move, Read messages, and Write messages)
+While the Servants can be 16777216 since they dont send any messages
 
 ## Installation
 You can get the lastest binary here: (soon)
@@ -31,4 +32,3 @@ If you want to cross compile it to run in a different OS or architecturte (like 
 ```go
 CGO_ENABLED=0 CC=arm-linux-gnueabi-cc GOOS=linux GOARCH=arm GOARM=6 go build .
 ```
-

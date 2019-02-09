@@ -24,7 +24,10 @@ func Move(s *discordgo.Session, servants []*discordgo.Session, m *discordgo.Mess
 	}
 	workers = append(workers, s)
 	guild, err := s.Guild(m.GuildID) // retrieving the server (guild) the message was originated from
-	channs := guild.Channels         // retrieving the list of channels and sorting (next line) them by position (in the users interface)
+	if err != nil {
+		log.Panic(err)
+	}
+	channs := guild.Channels // retrieving the list of channels and sorting (next line) them by position (in the users interface)
 	sort.Slice(channs[:], func(i, j int) bool {
 		return channs[i].Position < channs[j].Position
 	})
@@ -44,8 +47,16 @@ func Move(s *discordgo.Session, servants []*discordgo.Session, m *discordgo.Mess
 			return
 		}
 		// CHECK PERMISSIONS
+		if !checkPermissions(s, destination, m.Author.ID, discordgo.PermissionVoiceMoveMembers) {
+			s.ChannelMessageSend(m.ChannelID, "Sorry, but you dont have permissions to move to the Destination channel")
+			return
+		}
 		for _, member := range guild.VoiceStates {
 			if member.UserID == m.Author.ID {
+				if !checkPermissions(s, member.ChannelID, m.Author.ID, discordgo.PermissionVoiceMoveMembers) {
+					s.ChannelMessageSend(m.ChannelID, "Sorry, but you dont have permissions to move to the Destination channel")
+					return
+				}
 				num, err := MoveMembers(workers, guild, m.GuildID, member.ChannelID, destination)
 				if err != nil {
 					s.ChannelMessageSend(m.ChannelID, "Sorry, but: "+err.Error())
@@ -70,6 +81,10 @@ func Move(s *discordgo.Session, servants []*discordgo.Session, m *discordgo.Mess
 			s.ChannelMessageSend(m.ChannelID, "Sorry, I can't find channel "+params[2]+".")
 			return
 		}
+		if !checkPermissions(s, origin, m.Author.ID, discordgo.PermissionVoiceMoveMembers) {
+			s.ChannelMessageSend(m.ChannelID, "Sorry, but you dont have permissions to move to the Destination channel")
+			return
+		}
 		param3, err := strconv.Atoi(params[3])
 		var destination string
 		if err != nil {
@@ -81,7 +96,10 @@ func Move(s *discordgo.Session, servants []*discordgo.Session, m *discordgo.Mess
 			s.ChannelMessageSend(m.ChannelID, "Sorry, I can't find channel "+params[3]+".")
 			return
 		}
-		// CHECK PERMISSIONS
+		if !checkPermissions(s, destination, m.Author.ID, discordgo.PermissionVoiceMoveMembers) {
+			s.ChannelMessageSend(m.ChannelID, "Sorry, but you dont have permissions to move to the Destination channel")
+			return
+		}
 		num, err := MoveMembers(workers, guild, m.GuildID, origin, destination)
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, "Sorry, but: "+err.Error())
@@ -93,9 +111,6 @@ func Move(s *discordgo.Session, servants []*discordgo.Session, m *discordgo.Mess
 	}
 	log.Println("Sending help message on " + guild.Name + " , ID: " + guild.ID)
 	_, err = s.ChannelMessageSend(m.ChannelID, m.Author.Mention()+MoveHelper(channs, prefix))
-	if err != nil {
-		log.Println(err.Error())
-	}
 }
 
 // MoveMembers wraps MoveAndRetry with councurrent calls and error reporting.
@@ -215,7 +230,20 @@ func ChanByName(channs []*discordgo.Channel, name string) (string, error) {
 	return "", errors.New("Not Found")
 }
 
-// func checkPermissions(channelId string, permission int) {
-// 	// discordgo.PermissionVoiceMoveMembers
-// 	discordgo.PermissionOverwrite()
-// }
+// checkPermissions checks the permission for a User in a chennel
+/*
+Inputs:
+	s *discordgo.Session : the Bot doing the check
+	channelID string : the ID of the channel to check
+	userID string : the ID of the user to check
+	permission int : the permission Integer ( ex discordgo.PermissionVoiceMoveMembers)
+
+Outputs: True/False
+*/
+func checkPermissions(s *discordgo.Session, channelID string, userID string, permission int) bool {
+	userPermission, err := s.State.UserChannelPermissions(userID, channelID)
+	if err != nil || (userPermission&permission) != permission {
+		return false
+	}
+	return true
+}

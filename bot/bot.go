@@ -12,7 +12,7 @@ import (
 var commanderID string
 var commander *discordgo.Session
 var servantList []*discordgo.Session
-var BotPrefix string
+var botPrefix string
 
 // Close function ends the bot connection and closes its database
 func Close() {
@@ -38,8 +38,8 @@ func setupBot(bot *discordgo.Session) (string, error) {
 }
 
 // Start function connects and ads the necessary handlers
-func Start(commanderToken string, servantTokens []string, botPrefix string) {
-	BotPrefix = botPrefix
+func Start(commanderToken string, servantTokens []string, prefix string) {
+	botPrefix = prefix
 	var err error
 	commander, err = discordgo.New("Bot " + commanderToken)
 	for _, servantToken := range servantTokens {
@@ -88,7 +88,7 @@ func Start(commanderToken string, servantTokens []string, botPrefix string) {
 
 func ready(s *discordgo.Session, event *discordgo.Ready) {
 	// Set the playing status.
-	s.UpdateStatus(0, BotPrefix+" help")
+	s.UpdateStatus(0, botPrefix+" help")
 }
 
 // This function will be called (due to AddHandler above) every time a new
@@ -132,16 +132,16 @@ func guildDelete(s *discordgo.Session, event *discordgo.GuildDelete) {
 
 // messageHandler function will be called when the bot reads a message
 func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
-	if strings.HasPrefix(m.Content, BotPrefix) {
+	if strings.HasPrefix(m.Content, botPrefix) {
 		if m.Author.ID == commanderID {
 			return
 		}
-		if m.Content == BotPrefix || m.Content == BotPrefix+" help" {
-			s.ChannelMessageSend(m.ChannelID, m.Author.Mention()+`, use `+BotPrefix+` to use all my commands !
-			`+BotPrefix+`  move : Use this command to move users from one Voice Channel to another ! Type  `+BotPrefix+` move for help`)
-		} else if strings.HasPrefix(m.Content, BotPrefix+" move") {
+		if m.Content == botPrefix || m.Content == botPrefix+" help" {
+			s.ChannelMessageSend(m.ChannelID, m.Author.Mention()+`, use `+botPrefix+` to use all my commands !
+			`+botPrefix+`  move : Use this command to move users from one Voice Channel to another ! Type  `+botPrefix+` move for help`)
+		} else if strings.HasPrefix(m.Content, botPrefix+" move") {
 			// s.UserChannelPermissions(m.Author.ID,m.Author.)
-			mover.Move(s, servantList, m, BotPrefix)
+			mover.Move(s, servantList, m, botPrefix)
 		} else {
 			s.ChannelMessageSend(m.ChannelID, m.Author.Mention()+", you said "+m.Content+" ... ehh ?")
 		}
@@ -150,7 +150,7 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 // servantTest function will be called when the bot reads a message
 // func servantTest(s *discordgo.Session, m *discordgo.MessageCreate) {
-// 	if strings.HasPrefix(m.Content, BotPrefix+"s") {
+// 	if strings.HasPrefix(m.Content, botPrefix+"s") {
 // 		if m.Author.ID == commanderID {
 // 			return
 // 		}

@@ -188,7 +188,7 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				return
 			}
 			log.Println("Sending help message on " + guild.Name + " , ID: " + guild.ID)
-			_, err = s.ChannelMessageSend(m.ChannelID, m.Author.Mention()+mover.MoveHelper(channs, botPrefix))
+			s.ChannelMessageSend(m.ChannelID, m.Author.Mention()+mover.MoveHelper(channs, botPrefix))
 		} else {
 			s.ChannelMessageSend(m.ChannelID, m.Author.Mention()+", you said "+m.Content+" ... ehh ?")
 		}

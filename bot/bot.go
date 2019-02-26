@@ -11,7 +11,6 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-var commanderID string
 var commander *discordgo.Session
 var servantList []*discordgo.Session
 var botPrefix string
@@ -64,7 +63,7 @@ func Start(commanderToken string, servantTokens []string, prefix string) {
 	// 	}
 	// }
 
-	commanderID, err = setupBot(commander)
+	_, err = setupBot(commander)
 	if err != nil {
 		log.Println("Error creating Discord session: ", err)
 		return
@@ -96,11 +95,10 @@ func ready(s *discordgo.Session, event *discordgo.Ready) {
 // This function will be called (due to AddHandler above) every time a new
 // guild is joined.
 func guildCreate(s *discordgo.Session, event *discordgo.GuildCreate) {
-	log.Println("Joined " + event.Guild.Name + " (" + event.Guild.ID + ")")
-
 	if event.Guild.Unavailable {
 		return
 	}
+	log.Println("Joined " + event.Guild.Name + " (" + event.Guild.ID + ")")
 	// Database functionality not in use
 	/* dbpointer, err := db.ConnectDB(config.DatabasesPath + event.Guild.ID)
 	 if err != nil {
@@ -114,10 +112,10 @@ func guildCreate(s *discordgo.Session, event *discordgo.GuildCreate) {
 
 // guildDelete function will be called every time the bot leaves a guild.
 func guildDelete(s *discordgo.Session, event *discordgo.GuildDelete) {
-
 	if event.Guild.Unavailable {
 		return
 	}
+	log.Println("Left " + event.Guild.Name + " (" + event.Guild.ID + ")")
 	// db.PointerDict.Lock()
 	// db.PointerDict.Dict[event.Guild.ID].Lock()
 	// db.PointerDict.Dict[event.Guild.ID].Close()
@@ -135,7 +133,7 @@ func guildDelete(s *discordgo.Session, event *discordgo.GuildDelete) {
 // messageHandler function will be called when the bot reads a message
 func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if strings.HasPrefix(m.Content, botPrefix) {
-		if m.Author.ID == commanderID {
+		if m.Author.Bot {
 			return
 		}
 		if m.Content == botPrefix || m.Content == botPrefix+" help" {
@@ -194,13 +192,3 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 	}
 }
-
-// servantTest function will be called when the bot reads a message
-// func servantTest(s *discordgo.Session, m *discordgo.MessageCreate) {
-// 	if strings.HasPrefix(m.Content, botPrefix+"s") {
-// 		if m.Author.ID == commanderID {
-// 			return
-// 		}
-// 		s.ChannelMessageSend(m.ChannelID, m.Author.Mention()+" Sir yes sir !")
-// 	}
-// }

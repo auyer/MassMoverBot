@@ -6,16 +6,9 @@ import (
 	"log"
 )
 
-var (
-	// ServantTokens is the Discord API token used to connect
-	ServantTokens []string
-	// BotPrefix is the string that shoud initiate a conversation with the bot
-	BotPrefix string
-	// DatabasesPath indicates the path where database files will be created
-	DatabasesPath string
-	// Private variables
-	config *ConfigurationStruct
-)
+// var (
+// 	DatabasesPath string
+// )
 
 // ConfigurationStruct stores the necessary info for a Multi Token bot
 type ConfigurationStruct struct {
@@ -46,9 +39,7 @@ func ReadConfig(configFileLocation string) (*ConfigurationStruct, error) {
 		return nil, err
 	}
 
-	ServantTokens = config.ServantTokens
-	BotPrefix = config.BotPrefix
-	DatabasesPath = config.DatabasesPath
+	// DatabasesPath = config.DatabasesPath
 
 	return config, nil
 }

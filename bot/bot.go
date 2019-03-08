@@ -14,6 +14,7 @@ import (
 var commander *discordgo.Session
 var servantList []*discordgo.Session
 var botPrefix string
+var messages map[string]string
 
 // Close function ends the bot connection and closes its database
 func Close() {
@@ -39,7 +40,8 @@ func setupBot(bot *discordgo.Session) (string, error) {
 }
 
 // Start function connects and ads the necessary handlers
-func Start(commanderToken string, servantTokens []string, prefix string) {
+func Start(commanderToken string, servantTokens []string, prefix string, botMessages map[string]string) {
+	messages = botMessages
 	botPrefix = prefix
 	var err error
 	commander, err = discordgo.New("Bot " + commanderToken)
@@ -100,14 +102,14 @@ func guildCreate(s *discordgo.Session, event *discordgo.GuildCreate) {
 	}
 	log.Println("Joined " + event.Guild.Name + " (" + event.Guild.ID + ")")
 	// Database functionality not in use
-	/* dbpointer, err := db.ConnectDB(config.DatabasesPath + event.Guild.ID)
-	 if err != nil {
-		log.Println("Error creating guildDB " + err.Error())
-	}
-	db.PointerDict.Lock()
-	db.PointerDict.Dict[event.Guild.ID] = dbpointer
-	db.PointerDict.Unlock()
-	*/
+	// dbpointer, err := db.ConnectDB(config.DatabasesPath + event.Guild.ID)
+	// if err != nil {
+	// 	log.Println("Error creating guildDB " + err.Error())
+	// }
+	// db.PointerDict.Lock()
+	// db.PointerDict.Dict[event.Guild.ID] = dbpointer
+	// db.PointerDict.Unlock()
+
 }
 
 // guildDelete function will be called every time the bot leaves a guild.
@@ -136,9 +138,10 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if m.Author.Bot {
 			return
 		}
-		if m.Content == botPrefix || m.Content == botPrefix+" help" {
-			s.ChannelMessageSend(m.ChannelID, m.Author.Mention()+`, use `+botPrefix+` to use all my commands !
-			`+botPrefix+`  move : Use this command to move users from one Voice Channel to another ! Type  `+botPrefix+` move for help`)
+		if m.Content == botPrefix {
+			s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages["GeneralHelp"], m.Author.Mention(), botPrefix))
+		} else if m.Content == botPrefix+" help" {
+			s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages["HelpMessage"], botPrefix))
 		} else if strings.HasPrefix(m.Content, botPrefix+" move") {
 			workerschann := make(chan []*discordgo.Session, 1)
 			go utils.DetectServants(m.GuildID, append(servantList, s), workerschann)
@@ -156,39 +159,56 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				log.Println("Received 3 parameter move command on " + guild.Name + " , ID: " + guild.ID + " , by :" + m.Author.ID)
 				destination, err := utils.GetChannel(channs, params[2])
 				if err != nil {
-					s.ChannelMessageSend(m.ChannelID, "Sorry, I can't find channel "+params[2]+".")
+					s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages["CantFindChannel"], params[2]))
 				}
 				if !utils.CheckPermissions(s, destination, m.Author.ID, discordgo.PermissionVoiceMoveMembers) {
-					s.ChannelMessageSend(m.ChannelID, "Sorry, but you dont have permissions to move to the Destination channel")
+					s.ChannelMessageSend(m.ChannelID, messages["NoPermissionsDestination"])
 					return
 				}
-				mover.MoveDestination(s, <-workerschann, m, guild, botPrefix, destination)
+				num, err := mover.MoveDestination(s, <-workerschann, m, guild, botPrefix, destination)
+				if err != nil {
+					if err.Error() == "no permission origin" {
+						s.ChannelMessageSend(m.ChannelID, messages["NoPermissionsOrigin"])
+					} else if err.Error() == "cant find user" {
+						s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages["CantFindUser"], m.Author.Mention(), botPrefix))
+					} else {
+						s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages["SottyBut"], err.Error()))
+					}
+					return
+				}
+				s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages["JustMoved"], num))
 				return
 			} else if length == 4 {
 				log.Println("Received 4 parameter move command on " + guild.Name + " , ID: " + guild.ID + " , by :" + m.Author.ID)
 				origin, err := utils.GetChannel(channs, params[2])
 				if err != nil {
-					s.ChannelMessageSend(m.ChannelID, "Sorry, I can't find channel "+params[2]+".")
+					s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages["CantFindChannel"], params[2]))
 				}
 				destination, err := utils.GetChannel(channs, params[3])
 				if err != nil {
-					s.ChannelMessageSend(m.ChannelID, "Sorry, I can't find channel "+params[3]+".")
+					s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages["CantFindChannel"], params[3]))
 				}
 				if !utils.CheckPermissions(s, origin, m.Author.ID, discordgo.PermissionVoiceMoveMembers) {
-					s.ChannelMessageSend(m.ChannelID, "Sorry, but you dont have permissions from the Origin channel")
+					s.ChannelMessageSend(m.ChannelID, messages["NoPermissionsOrigin"])
 					return
 				}
 				if !utils.CheckPermissions(s, destination, m.Author.ID, discordgo.PermissionVoiceMoveMembers) {
-					s.ChannelMessageSend(m.ChannelID, "Sorry, but you dont have permissions to move to the Destination channel")
+					s.ChannelMessageSend(m.ChannelID, messages["NoPermissionsDestination"])
 					return
 				}
-				mover.MoveOriginDestination(s, <-workerschann, m, guild, botPrefix, origin, destination)
+				num, err := mover.MoveOriginDestination(s, <-workerschann, m, guild, botPrefix, origin, destination)
+				if err != nil {
+					s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages["JustMoved"], err.Error()))
+					log.Println(err.Error())
+					return
+				}
+				s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages["JustMoved"], num))
 				return
 			}
 			log.Println("Sending help message on " + guild.Name + " , ID: " + guild.ID)
-			s.ChannelMessageSend(m.ChannelID, m.Author.Mention()+mover.MoveHelper(channs, botPrefix))
+			s.ChannelMessageSend(m.ChannelID, mover.MoveHelper(channs, messages["MoveHelper"], botPrefix))
 		} else {
-			s.ChannelMessageSend(m.ChannelID, m.Author.Mention()+", you said "+m.Content+" ... ehh ?")
+			s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages["EhhMessage"], m.Author.Mention(), m.Content, botPrefix))
 		}
 	}
 }

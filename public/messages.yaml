@@ -1,0 +1,22 @@
+--- 
+CantFindChannel: "Sorry, I cant find channel %s."
+CantFindUser: "%s, you need to be connected to a channel for me to find you. Type %s move to get help."
+EhhMessage: "%s, you said %s ... ehh ? Type %s help."
+GeneralHelp: "Did you call me %s ? Type %s help to get help."
+HelpMessage: |
+    Use this command to move users from one Voice Channel to another ! 
+    Type  %s move for help
+    Thats all for now.
+JustMoved: "I Just moved %s users for you."
+MoveHelper: |
+    These are the possible *move* commands
+
+    %s  move - View this help and the list of available channels
+    %s  move *destination* - Move all users from your current channel to the *destination* channel
+    %s move *origin* *destination* - Move all users from *origin* to the *destination* 
+    
+    List of available channels /:
+    %s
+NoPermissionsDestination: "Sorry, but you dont have permissions to move to the Destination channel."
+NoPermissionsOrigin: "Sorry, but you dont have permissions to move from the Origin channel."
+SorryBut: "Sorry, but: %s"

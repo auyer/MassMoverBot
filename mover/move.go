@@ -14,36 +14,22 @@ import (
 )
 
 // MoveDestination function moves discord users
-func MoveDestination(s *discordgo.Session, workers []*discordgo.Session, m *discordgo.MessageCreate, guild *discordgo.Guild, prefix string, destination string) {
+func MoveDestination(s *discordgo.Session, workers []*discordgo.Session, m *discordgo.MessageCreate, guild *discordgo.Guild, prefix string, destination string) (string, error) {
 	for _, member := range guild.VoiceStates {
 		if member.UserID == m.Author.ID {
 			if !utils.CheckPermissions(s, member.ChannelID, m.Author.ID, discordgo.PermissionVoiceMoveMembers) {
-				s.ChannelMessageSend(m.ChannelID, "Sorry, but you dont have permissions to move from your current channel")
-				return
+				return "", errors.New("no permission origin")
 			}
-			num, err := MoveMembers(workers, guild, member.ChannelID, destination)
-			if err != nil {
-				s.ChannelMessageSend(m.ChannelID, "Sorry, but: "+err.Error())
-				log.Println(err.Error())
-				return
-			}
-			s.ChannelMessageSend(m.ChannelID, "I Just moved "+num+" users for you.")
-			return
+			return MoveOriginDestination(s, workers, m, guild, prefix, member.ChannelID, destination)
 		}
 	}
-	s.ChannelMessageSend(m.ChannelID, m.Author.Mention()+", you need to be connected to a channel for me to find you. Type '"+prefix+" move' to get help.")
+	return "", errors.New("cant find user")
 }
 
 // MoveOriginDestination function moves discord users
-func MoveOriginDestination(s *discordgo.Session, workers []*discordgo.Session, m *discordgo.MessageCreate, guild *discordgo.Guild, prefix string, origin string, destination string) {
+func MoveOriginDestination(s *discordgo.Session, workers []*discordgo.Session, m *discordgo.MessageCreate, guild *discordgo.Guild, prefix string, origin string, destination string) (string, error) {
 	num, err := MoveMembers(workers, guild, origin, destination)
-	if err != nil {
-		s.ChannelMessageSend(m.ChannelID, "Sorry, but: "+err.Error())
-		log.Println(err.Error())
-		return
-	}
-	s.ChannelMessageSend(m.ChannelID, "I Just moved "+num+" users for you.")
-	return
+	return num, err
 }
 
 // MoveMembers wraps MoveAndRetry with councurrent calls and error reporting.
@@ -106,17 +92,17 @@ Inputs:
 
 Outputs: message string
 */
-func MoveHelper(channs []*discordgo.Channel, prefix string) string {
-	message := `View this help and the list of available channels\n\t" + prefix + " move\n\nMove all users from your channel to the <integer:destination channel>\n\t" + prefix + " move <number:destination channel>\n\nMove all users from <integer:origin channel> to the <integer:destination channel>\n\t" + prefix + " move <number:origin channel> <number:destination channel>\n\nList of available channels:\n`
+func MoveHelper(channs []*discordgo.Channel, message, prefix string) string {
 	sort.Slice(channs[:], func(i, j int) bool {
 		return channs[i].Position < channs[j].Position
 	})
 	i := 0
+	channelString := ""
 	for _, chann := range channs {
 		if chann.Type == 2 {
 			i++
-			message = message + strconv.Itoa(i) + " ) " + chann.Name + "\n"
+			channelString = channelString + strconv.Itoa(i) + " ) " + chann.Name + "\n"
 		}
 	}
-	return message
+	return fmt.Sprintf(message, prefix, prefix, prefix, channelString)
 }

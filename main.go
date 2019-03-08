@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	version = "0.2-beta"
+	version = "0.3-beta"
 	website = "github.com/auyer/commanderbot/"
 )
 

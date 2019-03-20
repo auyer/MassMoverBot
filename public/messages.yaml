@@ -24,7 +24,7 @@ EN :
         Thats all for now.
     JustMoved: "I just moved %s users for you."
     MoveHelper: |
-        Esses são os comando possíveis para mover membros\: 
+        These are the possible *move* commands\: 
 
         %s  move - View this help and the list of available channels
         %s  move *destination* - Move all users from your current channel to the *destination* channel
@@ -50,7 +50,7 @@ PT :
         É isso por enquanto.
     JustMoved: "Eu acabei de mover %s usuários para você."
     MoveHelper: |
-        These are the possible *move* commands
+        Esses são os comando possíveis para mover membros\:
 
         %s  move - Veja esta mensagem de ajuda e a lista de canais disponíveis.
         %s  move *destino* - Move todos os usuários do seu canal atual para o canal de *destino*.

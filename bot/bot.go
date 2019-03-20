@@ -108,7 +108,6 @@ func guildCreate(s *discordgo.Session, event *discordgo.GuildCreate) {
 			db.UpdateDataTuple(conn, "M:"+event.Guild.ID, "1")
 		}
 	}
-
 }
 
 // guildDelete function will be called every time the bot leaves a guild.

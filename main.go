@@ -16,6 +16,7 @@ import (
 	"github.com/rakyll/statik/fs"
 
 	"github.com/auyer/commanderBot/config"
+	"github.com/auyer/commanderBot/db"
 
 	"github.com/auyer/commanderBot/bot"
 )
@@ -50,6 +51,20 @@ func main() {
 		return
 	}
 
+	if _, err := os.Stat(config.DatabasesPath); os.IsNotExist(err) {
+		err = os.Mkdir(config.DatabasesPath, os.ModePerm)
+		if err != nil && err.Error() != "file exists" {
+			log.Println("Error creating Databases folder: ", err)
+			return
+		}
+	}
+	conn, err := db.ConnectDB(config.DatabasesPath + "/db")
+	if err != nil {
+		log.Println("Error creating guildDB " + err.Error())
+		return
+	}
+	defer conn.Close()
+
 	mesagesFile, err := statikFS.Open("/messages.yaml")
 	if err != nil {
 		log.Print(err.Error())
@@ -58,7 +73,7 @@ func main() {
 
 	byteValue, _ := ioutil.ReadAll(mesagesFile)
 
-	var messages map[string]string
+	var messages map[string]map[string]string
 
 	err = yaml.Unmarshal(byteValue, &messages)
 	if err != nil {
@@ -66,7 +81,7 @@ func main() {
 		return
 	}
 
-	bot.Start(config.CommanderToken, config.ServantTokens, config.BotPrefix, messages)
+	bot.Start(config.CommanderToken, config.ServantTokens, config.BotPrefix, conn, messages)
 	defer bot.Close()
 	quit := make(chan os.Signal)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)

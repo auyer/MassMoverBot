@@ -1,41 +1,39 @@
-// Package db manages route storage for FastGate.
+// Package db manages data stored about the servers
 // The storage is performed by a Key-Value community database called Badger.
 package db
 
 import (
-	"fmt"
-	"log"
 	"os"
 	"path/filepath"
-	"sync"
 
 	"github.com/dgraph-io/badger"
 )
 
-// Endpoint structure stores the Endpoints for the gateway.
-type Endpoint struct {
-	Address  string `json:"address"`
-	Resource string `json:"resource"`
+// DataTuple structure stores the DataTuples for the bot.
+type DataTuple struct {
+	Key   string `json:"Key"`
+	Value string `json:"Value"`
 }
 
-// PointerDict structure stores pointers to the databases and a Mutex lock for preventing wrong usage of pointers.
-var PointerDict = struct {
-	sync.RWMutex
-	Dict map[string]*badger.DB
-}{Dict: make(map[string]*badger.DB)}
+// THIS SECTION REFERS TO MULTIPLE DBs. Unused atm
+// // PointerDict structure stores pointers to the databases and a Mutex lock for preventing wrong usage of pointers.
+// var PointerDict = struct {
+// 	sync.RWMutex
+// 	Dict map[string]*badger.DB
+// }{Dict: make(map[string]*badger.DB)}
 
-// CloseDatabases close all databases in the PointerDict structure
-func CloseDatabases() {
-	PointerDict.Lock()
-	for _, i := range PointerDict.Dict {
-		i.Lock()
-		err := i.Close()
-		if err != nil {
-			log.Println("[DB] " + err.Error())
-		}
-	}
-	PointerDict.Unlock()
-}
+// // CloseDatabases close all databases in the PointerDict structure
+// func CloseDatabases() {
+// 	PointerDict.Lock()
+// 	for _, i := range PointerDict.Dict {
+// 		i.Lock()
+// 		err := i.Close()
+// 		if err != nil {
+// 			log.Println("[DB] " + err.Error())
+// 		}
+// 	}
+// 	PointerDict.Unlock()
+// }
 
 // RemoveDatabase function deletes the database in a folder
 func RemoveDatabase(dir, id string) error {
@@ -59,13 +57,13 @@ func RemoveDatabase(dir, id string) error {
 	return nil
 }
 
+// // ConnectDB manages the database connection and configuration.
+// func ConnectDB(databasePath string) (*badger.DB, error) {
+// 	return connectDB(fmt.Sprintf(databasePath))
+// }
+
 // ConnectDB manages the database connection and configuration.
 func ConnectDB(databasePath string) (*badger.DB, error) {
-	return connectDB(fmt.Sprintf(databasePath))
-}
-
-// connectDB manages the database connection and configuration.
-func connectDB(databasePath string) (*badger.DB, error) {
 	opts := badger.DefaultOptions
 	opts.Dir = databasePath
 	opts.ValueDir = databasePath
@@ -76,16 +74,16 @@ func connectDB(databasePath string) (*badger.DB, error) {
 	return db, nil
 }
 
-// UpdateEndpoint is a simple querry that inserts/updates the Endpoint tuple used by FastGate.
-func UpdateEndpoint(database *badger.DB, key string, address string) error {
+// UpdateDataTuple is a simple querry that inserts/updates the DataTuple tuple used by FastGate.
+func UpdateDataTuple(database *badger.DB, key string, Key string) error {
 	return database.Update(func(txn *badger.Txn) error {
-		err := txn.Set([]byte(key), []byte(address))
+		err := txn.Set([]byte(key), []byte(Key))
 		return err
 	})
 }
 
-// GetEndpoint finds an address matching an key and returns it as a string.
-func GetEndpoint(database *badger.DB, key string) (value string, err error) {
+// GetDataTuple finds an Key matching an key and returns it as a string.
+func GetDataTuple(database *badger.DB, key string) (value string, err error) {
 	var result []byte
 	err = database.View(func(txn *badger.Txn) error {
 		item, err := txn.Get([]byte(key))
@@ -103,8 +101,16 @@ func GetEndpoint(database *badger.DB, key string) (value string, err error) {
 	return string(result), err
 }
 
-// GetEndpoints function will read every entry in the database and return it as a list of Endpoints.
-func GetEndpoints(database *badger.DB) (endpoints []Endpoint, err error) {
+// DeleteDataTuple finds a matching Key and delets its data
+func DeleteDataTuple(database *badger.DB, key string) error {
+	return database.View(func(txn *badger.Txn) error {
+		err := txn.Delete([]byte(key))
+		return err
+	})
+}
+
+// GetDataTuples function will read every entry in the database and return it as a list of DataTuples.
+func GetDataTuples(database *badger.DB) (DataTuples []DataTuple, err error) {
 	err = database.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
 		opts.PrefetchSize = 10
@@ -118,7 +124,7 @@ func GetEndpoints(database *badger.DB) (endpoints []Endpoint, err error) {
 			if err != nil {
 				return err
 			}
-			endpoints = append(endpoints, Endpoint{string(k), string(val)})
+			DataTuples = append(DataTuples, DataTuple{string(k), string(val)})
 		}
 		return nil
 	})

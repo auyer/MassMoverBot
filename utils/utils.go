@@ -8,6 +8,11 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
+var langs = map[int]string{
+	1: "EN",
+	2: "PT",
+}
+
 // GetChannel retrieves the channel ID by the name or position ID
 /*
 Inputs:
@@ -110,4 +115,31 @@ func DetectServants(guildID string, servants []*discordgo.Session, rchan chan []
 		}
 	}
 	rchan <- workers
+}
+
+// SelectLang selects a language code based on number or string code
+/*
+Input:
+	choice string
+Output:
+	language string
+*/
+func SelectLang(choice string) string {
+	if intparam, err := strconv.Atoi(choice); err == nil {
+		choice := langs[intparam]
+		if choice != "" {
+			return choice
+		}
+		return langs[1]
+	}
+	switch strings.ToUpper(choice) {
+	case "EN":
+		return "EN"
+	case "PT":
+		return "PT"
+	case "BR":
+		return "PT"
+	default:
+		return "EN"
+	}
 }

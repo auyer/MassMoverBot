@@ -1,22 +1,64 @@
 --- 
-CantFindChannel: "Sorry, I cant find channel %s."
-CantFindUser: "%s, you need to be connected to a channel for me to find you. Type %s move to get help."
-EhhMessage: "%s, you said %s ... ehh ? Type %s help."
-GeneralHelp: "Did you call me %s ? Type %s help to get help."
-HelpMessage: |
-    Use this command to move users from one Voice Channel to another ! 
-    Type  %s move for help
-    Thats all for now.
-JustMoved: "I Just moved %s users for you."
-MoveHelper: |
-    These are the possible *move* commands
+LANG:
+    WelcomeAndLang : |
+        [EN] Hi ! Thank you for adding this bot.
+            Remember to set your language in your guild typing \' %s lang\' and chosing one of the options.
 
-    %s  move - View this help and the list of available channels
-    %s  move *destination* - Move all users from your current channel to the *destination* channel
-    %s move *origin* *destination* - Move all users from *origin* to the *destination* 
-    
-    List of available channels /:
-    %s
-NoPermissionsDestination: "Sorry, but you dont have permissions to move to the Destination channel."
-NoPermissionsOrigin: "Sorry, but you dont have permissions to move from the Origin channel."
-SorryBut: "Sorry, but: %s"
+        [PT/BR] Olá ! Obrigado por adicionar este bot.
+            Lembre-se de configurar a linguagem em sua guild digitando \' %s lang\' e escolhendo uma das opçoes.
+    LangSetupMessage: |  
+        1 - [EN] Type \' %s lang\' followed by \'EN\' or \'1\'  and chose the English language 
+
+        2 - [PT/BR] Digite \' %s lang\' seguido de \'PT\', \'BR\' ou \'2\' e escolha a linguagem Portuguesa.
+EN :
+    LangSet : "You chose the English Language [EN]. You can always Change it using the same command."
+    CantFindChannel: "Sorry, I cant find channel %s."
+    CantFindUser: "%s, you need to be connected to a channel for me to find you. Type \' %s move\' to get help."
+    EhhMessage: "%s, you said '%s' ... ehh ? Type \' %s help\' ."
+    GeneralHelp: "Did you call me %s ? Type \' %s help\' to get help."
+    NotInGuild: "Hey %s, you should use this command in a Guild, not in a private chat."
+    HelpMessage: |
+        Use this command to move users from one Voice Channel to another ! 
+        Type \' %s move\' for help
+        Type \' %s lang\' to configure the bot language.
+        Thats all for now.
+    JustMoved: "I just moved %s users for you."
+    MoveHelper: |
+        These are the possible *move* commands
+
+        %s  move - View this help and the list of available channels
+        %s  move *destination* - Move all users from your current channel to the *destination* channel
+        %s move *origin* *destination* - Move all users from *origin* to the *destination* 
+        PS.\: *origin* and *destination* can be the channels number or the channels name.
+        
+        List of available channels :
+        %s
+    NoPermissionsDestination: "Sorry, but you dont have permissions to move to the Destination channel."
+    NoPermissionsOrigin: "Sorry, but you dont have permissions to move from the Origin channel."
+    SorryBut: "Sorry, but: %s"
+PT :
+    LangSet : "Você escolheu a Língua Portuguesa [PT/BR]. Você sempre proderá mudar usando o mesmo comando."
+    CantFindChannel: "Desculpe, eu não consigo achar o canal %s."
+    CantFindUser: "%s, você precisa estar conectado a um canal de Voz para eu te encontrar. Digite \' %s move\' para obter ajuda."
+    EhhMessage: "%s, você disse '%s' ... ahn? Digite %s help."
+    GeneralHelp: "Me chamou %s ? Digite %s help para receber ajuda."
+    NotInGuild: "Oi %s, você precisa usar estes comandos em uma guilda, não em um chat privado."
+    HelpMessage: |
+        Utilize este bot para mover os usuários de um canal de Voz para outro !
+        Digite  \' %s move\' para ajuda com o comando de mover.
+        Digite \' %s lang\' para configurar a linguagem do bot.
+        É isso por enquanto.
+    JustMoved: "Eu acabei de mover %s usuários para você."
+    MoveHelper: |
+        These are the possible *move* commands
+
+        %s  move - Veja esta mensagem de ajuda e a lista de canais disponíveis.
+        %s  move *destino* - Move todos os usuários do seu canal atual para o canal de *destino*.
+        %s move *origem* *destino* - Move todos os usuários do canal de *origem* para o canal de *destino*.
+        PS.\: *origem* e *destino* podem sem os números ou os nomes dos canais.
+        
+        Lista de canais disponíveis \:
+        %s
+    NoPermissionsDestination: "Desculpe, mas você não tem permissão para mover para o canal de Destino."
+    NoPermissionsOrigin: "Desculpe, mas você não tem permissão para mover do canal de Origem."
+    SorryBut: "Desculpe, mas: %s"

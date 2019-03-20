@@ -6,20 +6,22 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/auyer/commanderBot/db"
 	"github.com/auyer/commanderBot/mover"
 	"github.com/auyer/commanderBot/utils"
 	"github.com/bwmarrin/discordgo"
+	"github.com/dgraph-io/badger"
 )
 
 var commander *discordgo.Session
 var servantList []*discordgo.Session
+var conn *badger.DB
 var botPrefix string
-var messages map[string]string
+var messages map[string]map[string]string
 
 // Close function ends the bot connection and closes its database
 func Close() {
 	log.Println("Closing")
-	// db.CloseDatabases()
 	commander.Close()
 	for _, servant := range servantList {
 		servant.Close()
@@ -29,8 +31,6 @@ func Close() {
 func setupBot(bot *discordgo.Session) (string, error) {
 
 	bot.AddHandler(ready)
-	bot.AddHandler(guildCreate)
-	bot.AddHandler(guildDelete)
 	u, err := commander.User("@me")
 	if err != nil {
 		log.Println("Error creating Discord session: ", err)
@@ -40,9 +40,10 @@ func setupBot(bot *discordgo.Session) (string, error) {
 }
 
 // Start function connects and ads the necessary handlers
-func Start(commanderToken string, servantTokens []string, prefix string, botMessages map[string]string) {
+func Start(commanderToken string, servantTokens []string, prefix string, DBConnection *badger.DB, botMessages map[string]map[string]string) {
 	messages = botMessages
 	botPrefix = prefix
+	conn = DBConnection
 	var err error
 	commander, err = discordgo.New("Bot " + commanderToken)
 	for _, servantToken := range servantTokens {
@@ -57,15 +58,9 @@ func Start(commanderToken string, servantTokens []string, prefix string, botMess
 
 	}
 
-	// if _, err := os.Stat(config.DatabasesPath); os.IsNotExist(err) {
-	// 	err = os.Mkdir(config.DatabasesPath, os.ModePerm)
-	// 	if err != nil && err.Error() != "file exists" {
-	// 		log.Println("Error creating Databases folder: ", err)
-	// 		return
-	// 	}
-	// }
-
 	_, err = setupBot(commander)
+	commander.AddHandler(guildCreate)
+	commander.AddHandler(guildDelete)
 	if err != nil {
 		log.Println("Error creating Discord session: ", err)
 		return
@@ -100,15 +95,19 @@ func guildCreate(s *discordgo.Session, event *discordgo.GuildCreate) {
 	if event.Guild.Unavailable {
 		return
 	}
-	log.Println("Joined " + event.Guild.Name + " (" + event.Guild.ID + ")")
-	// Database functionality not in use
-	// dbpointer, err := db.ConnectDB(config.DatabasesPath + event.Guild.ID)
-	// if err != nil {
-	// 	log.Println("Error creating guildDB " + err.Error())
-	// }
-	// db.PointerDict.Lock()
-	// db.PointerDict.Dict[event.Guild.ID] = dbpointer
-	// db.PointerDict.Unlock()
+	log.Println("Joined " + event.Guild.Name + " (" + event.Guild.ID + ")" + " in " + event.Guild.Region)
+
+	val, err := db.GetDataTuple(conn, "M:"+event.Guild.ID)
+	if err != nil {
+		if err == badger.ErrKeyNotFound || val == "" {
+			err = askMember(s, event.Guild.OwnerID, fmt.Sprintf(messages["LANG"]["WelcomeAndLang"], botPrefix, botPrefix))
+			if err != nil {
+				log.Println("Failed to send mesage to owner.")
+				return
+			}
+			db.UpdateDataTuple(conn, "M:"+event.Guild.ID, "1")
+		}
+	}
 
 }
 
@@ -118,36 +117,57 @@ func guildDelete(s *discordgo.Session, event *discordgo.GuildDelete) {
 		return
 	}
 	log.Println("Left " + event.Guild.Name + " (" + event.Guild.ID + ")")
-	// db.PointerDict.Lock()
-	// db.PointerDict.Dict[event.Guild.ID].Lock()
-	// db.PointerDict.Dict[event.Guild.ID].Close()
-	// db.PointerDict.Dict[event.Guild.ID].Unlock()
-	// delete(db.PointerDict.Dict, event.Guild.ID)
-	// db.PointerDict.Unlock()
+	_, err := db.GetDataTuple(conn, event.Guild.ID)
+	if err == nil {
+		db.DeleteDataTuple(conn, event.Guild.ID)
+	}
+}
 
-	// err := db.RemoveDatabase(config.DatabasesPath, event.Guild.ID)
-	// if err != nil {
-	// 	log.Println(err)
-	// }
-
+// askMember function is used to send a private message to a guild member
+func askMember(s *discordgo.Session, owner string, message string) error {
+	c, err := s.UserChannelCreate(owner)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	_, err = s.ChannelMessageSend(c.ID, message) // event.Guild.OwnerID
+	return err
 }
 
 // messageHandler function will be called when the bot reads a message
 func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
+	langg, err := db.GetDataTuple(conn, m.GuildID)
+	if err != nil {
+		langg = "EN"
+	}
+	if strings.HasPrefix(m.Content, botPrefix+" lang") {
+		params := strings.Split(m.Content, " ") // spliting the user request
+		if len(params) == 3 {
+			chosenLang := utils.SelectLang(params[2])
+			db.UpdateDataTuple(conn, m.GuildID, chosenLang)
+			langg = chosenLang
+			s.ChannelMessageSend(m.ChannelID, messages[langg]["LangSet"])
+			return
+		}
+		s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages["LANG"]["LangSetupMessage"], botPrefix, botPrefix))
+		return
+	}
 	if strings.HasPrefix(m.Content, botPrefix) {
 		if m.Author.Bot {
 			return
 		}
 		if m.Content == botPrefix {
-			s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages["GeneralHelp"], m.Author.Mention(), botPrefix))
+			s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["GeneralHelp"], m.Author.Mention(), botPrefix))
 		} else if m.Content == botPrefix+" help" {
-			s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages["HelpMessage"], botPrefix))
+			s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["HelpMessage"], botPrefix, botPrefix))
 		} else if strings.HasPrefix(m.Content, botPrefix+" move") {
 			workerschann := make(chan []*discordgo.Session, 1)
 			go utils.DetectServants(m.GuildID, append(servantList, s), workerschann)
 			guild, err := s.Guild(m.GuildID) // retrieving the server (guild) the message was originated from
 			if err != nil {
-				log.Panic(err)
+				log.Println(err)
+				s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["NotInGuild"], m.Author.Mention()))
+				return
 			}
 			channs := guild.Channels // retrieving the list of channels and sorting (next line) them by position (in the users interface)
 			sort.Slice(channs[:], func(i, j int) bool {
@@ -159,56 +179,56 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				log.Println("Received 3 parameter move command on " + guild.Name + " , ID: " + guild.ID + " , by :" + m.Author.ID)
 				destination, err := utils.GetChannel(channs, params[2])
 				if err != nil {
-					s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages["CantFindChannel"], params[2]))
+					s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["CantFindChannel"], params[2]))
 				}
 				if !utils.CheckPermissions(s, destination, m.Author.ID, discordgo.PermissionVoiceMoveMembers) {
-					s.ChannelMessageSend(m.ChannelID, messages["NoPermissionsDestination"])
+					s.ChannelMessageSend(m.ChannelID, messages[langg]["NoPermissionsDestination"])
 					return
 				}
 				num, err := mover.MoveDestination(s, <-workerschann, m, guild, botPrefix, destination)
 				if err != nil {
 					if err.Error() == "no permission origin" {
-						s.ChannelMessageSend(m.ChannelID, messages["NoPermissionsOrigin"])
+						s.ChannelMessageSend(m.ChannelID, messages[langg]["NoPermissionsOrigin"])
 					} else if err.Error() == "cant find user" {
-						s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages["CantFindUser"], m.Author.Mention(), botPrefix))
+						s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["CantFindUser"], m.Author.Mention(), botPrefix))
 					} else {
-						s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages["SottyBut"], err.Error()))
+						s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["SorryBut"], err.Error()))
 					}
 					return
 				}
-				s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages["JustMoved"], num))
+				s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["JustMoved"], num))
 				return
 			} else if length == 4 {
 				log.Println("Received 4 parameter move command on " + guild.Name + " , ID: " + guild.ID + " , by :" + m.Author.ID)
 				origin, err := utils.GetChannel(channs, params[2])
 				if err != nil {
-					s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages["CantFindChannel"], params[2]))
+					s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["CantFindChannel"], params[2]))
 				}
 				destination, err := utils.GetChannel(channs, params[3])
 				if err != nil {
-					s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages["CantFindChannel"], params[3]))
+					s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["CantFindChannel"], params[3]))
 				}
 				if !utils.CheckPermissions(s, origin, m.Author.ID, discordgo.PermissionVoiceMoveMembers) {
-					s.ChannelMessageSend(m.ChannelID, messages["NoPermissionsOrigin"])
+					s.ChannelMessageSend(m.ChannelID, messages[langg]["NoPermissionsOrigin"])
 					return
 				}
 				if !utils.CheckPermissions(s, destination, m.Author.ID, discordgo.PermissionVoiceMoveMembers) {
-					s.ChannelMessageSend(m.ChannelID, messages["NoPermissionsDestination"])
+					s.ChannelMessageSend(m.ChannelID, messages[langg]["NoPermissionsDestination"])
 					return
 				}
 				num, err := mover.MoveOriginDestination(s, <-workerschann, m, guild, botPrefix, origin, destination)
 				if err != nil {
-					s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages["JustMoved"], err.Error()))
+					s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["JustMoved"], err.Error()))
 					log.Println(err.Error())
 					return
 				}
-				s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages["JustMoved"], num))
+				s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["JustMoved"], num))
 				return
 			}
 			log.Println("Sending help message on " + guild.Name + " , ID: " + guild.ID)
-			s.ChannelMessageSend(m.ChannelID, mover.MoveHelper(channs, messages["MoveHelper"], botPrefix))
+			s.ChannelMessageSend(m.ChannelID, mover.MoveHelper(channs, messages[langg]["MoveHelper"], botPrefix))
 		} else {
-			s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages["EhhMessage"], m.Author.Mention(), m.Content, botPrefix))
+			s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["EhhMessage"], m.Author.Mention(), m.Content, botPrefix))
 		}
 	}
 }

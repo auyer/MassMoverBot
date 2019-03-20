@@ -60,7 +60,7 @@ func MoveMembers(servants []*discordgo.Session, guild *discordgo.Guild, origin s
 		}
 	}
 	wg.Wait()
-	return fmt.Sprintf("Moved %d users", num), nil
+	return strconv.Itoa(num), nil
 }
 
 // MoveAndRetry is a wrapper on top of discordgo.Session.GuildMemberMove with a retry function

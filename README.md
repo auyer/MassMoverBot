@@ -58,3 +58,13 @@ If you want to cross compile it to run in a different OS or architecturte (like 
 ```go
 CGO_ENABLED=0 CC=arm-linux-gnueabi-cc GOOS=linux GOARCH=arm GOARM=6 go build .
 ```
+
+## Changing/Building the messages
+
+All messages are stored in [public/messages.yaml](public/messages.yaml) file, and loaded by the `Statik` pre compilation.
+To build the messages, it is necessary to get the statik package, and run the command in the root if the commanderBot repository.
+
+````
+go get github.com/rakyll/statik
+statik
+```

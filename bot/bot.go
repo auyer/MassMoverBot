@@ -197,7 +197,7 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 					return
 				}
 				s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["JustMoved"], num))
-				go bumpStatistics(conn)
+				go bumpStatistics(s, conn)
 				return
 			} else if length == 4 {
 				log.Println("Received 4 parameter move command on " + guild.Name + " , ID: " + guild.ID + " , by :" + m.Author.ID)
@@ -224,7 +224,8 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 					return
 				}
 				s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["JustMoved"], num))
-				go bumpStatistics(conn)
+				go bumpStatistics(s, conn)
+
 				return
 			}
 			log.Println("Sending help message on " + guild.Name + " , ID: " + guild.ID)
@@ -235,8 +236,7 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 }
 
-// Use this in bot status ?
-func bumpStatistics(conn *badger.DB) {
+func bumpStatistics(s *discordgo.Session, conn *badger.DB) {
 	sts, err := db.GetDataTuple(conn, "statistics")
 	if err == nil {
 		stsInt, err := strconv.Atoi(sts)
@@ -245,6 +245,7 @@ func bumpStatistics(conn *badger.DB) {
 			return
 		}
 		db.UpdateDataTuple(conn, "statistics", strconv.Itoa(stsInt+1))
+		s.UpdateStatus(0, fmt.Sprintf("Moved %d times \n ! %s help", stsInt+1, botPrefix))
 		return
 	}
 	db.UpdateDataTuple(conn, "statistics", "1")

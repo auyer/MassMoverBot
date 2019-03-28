@@ -75,9 +75,9 @@ func ConnectDB(databasePath string) (*badger.DB, error) {
 }
 
 // UpdateDataTuple is a simple querry that inserts/updates the DataTuple tuple used by FastGate.
-func UpdateDataTuple(database *badger.DB, key string, Key string) error {
+func UpdateDataTuple(database *badger.DB, key string, value string) error {
 	return database.Update(func(txn *badger.Txn) error {
-		err := txn.Set([]byte(key), []byte(Key))
+		err := txn.Set([]byte(key), []byte(value))
 		return err
 	})
 }

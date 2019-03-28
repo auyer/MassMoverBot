@@ -63,6 +63,12 @@ func main() {
 		log.Println("Error creating guildDB " + err.Error())
 		return
 	}
+	sts, err := db.GetDataTuple(conn, "statistics")
+	if err == nil {
+		fmt.Println(fmt.Sprintf("Current Statistics: %s moves", sts))
+	} else {
+		db.UpdateDataTuple(conn, "statistics", "0")
+	}
 	defer conn.Close()
 
 	mesagesFile, err := statikFS.Open("/messages.yaml")

@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	version = "0.4-beta"
+	version = "0.5-beta"
 	website = "github.com/auyer/massmoverbot/"
 )
 

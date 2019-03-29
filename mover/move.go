@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/auyer/commanderBot/utils"
+	"github.com/auyer/massmoverbot/utils"
 	"github.com/bwmarrin/discordgo"
 )
 

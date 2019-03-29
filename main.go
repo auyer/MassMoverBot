@@ -12,18 +12,18 @@ import (
 
 	"gopkg.in/yaml.v2"
 
-	_ "github.com/auyer/commanderBot/statik"
+	_ "github.com/auyer/massmoverbot/statik"
 	"github.com/rakyll/statik/fs"
 
-	"github.com/auyer/commanderBot/config"
-	"github.com/auyer/commanderBot/db"
+	"github.com/auyer/massmoverbot/config"
+	"github.com/auyer/massmoverbot/db"
 
-	"github.com/auyer/commanderBot/bot"
+	"github.com/auyer/massmoverbot/bot"
 )
 
 const (
 	version = "0.4-beta"
-	website = "github.com/auyer/commanderbot/"
+	website = "github.com/auyer/massmoverbot/"
 )
 
 func main() {
@@ -63,7 +63,7 @@ func main() {
 		log.Println("Error creating guildDB " + err.Error())
 		return
 	}
-	defer conn.Close()
+	bot.GetAndInitStats(conn)
 
 	mesagesFile, err := statikFS.Open("/messages.yaml")
 	if err != nil {

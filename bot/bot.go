@@ -1,15 +1,16 @@
 package bot
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"sort"
 	"strconv"
 	"strings"
 
-	"github.com/auyer/commanderBot/db"
-	"github.com/auyer/commanderBot/mover"
-	"github.com/auyer/commanderBot/utils"
+	"github.com/auyer/massmoverbot/db"
+	"github.com/auyer/massmoverbot/mover"
+	"github.com/auyer/massmoverbot/utils"
 	"github.com/bwmarrin/discordgo"
 	"github.com/dgraph-io/badger"
 )
@@ -54,7 +55,6 @@ func Start(commanderToken string, servantTokens []string, prefix string, DBConne
 			return
 		}
 		setupBot(servant)
-		// servant.AddHandler(servantTest)
 		servantList = append(servantList, servant)
 
 	}
@@ -197,7 +197,7 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 					return
 				}
 				s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["JustMoved"], num))
-				go bumpStatistics(s, conn)
+				bumpStatistics(num, s, conn)
 				return
 			} else if length == 4 {
 				log.Println("Received 4 parameter move command on " + guild.Name + " , ID: " + guild.ID + " , by :" + m.Author.ID)
@@ -224,8 +224,7 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 					return
 				}
 				s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["JustMoved"], num))
-				go bumpStatistics(s, conn)
-
+				go bumpStatistics(num, s, conn)
 				return
 			}
 			log.Println("Sending help message on " + guild.Name + " , ID: " + guild.ID)
@@ -236,18 +235,49 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 }
 
-func bumpStatistics(s *discordgo.Session, conn *badger.DB) {
-	sts, err := db.GetDataTuple(conn, "statistics")
-	if err == nil {
-		stsInt, err := strconv.Atoi(sts)
-		if err != nil {
-			db.UpdateDataTuple(conn, "statistics", "1")
-			return
-		}
-		db.UpdateDataTuple(conn, "statistics", strconv.Itoa(stsInt+1))
-		s.UpdateStatus(0, fmt.Sprintf("Moved %d times \n ! %s help", stsInt+1, botPrefix))
+// GetAndInitStats prints the current statistics, and set them up if there are none.
+func GetAndInitStats(conn *badger.DB) {
+	bytesStats, err := db.GetDataTupleBytes(conn, "statistics")
+	stats := map[string]int{}
+	if err != nil {
+		log.Println("Failed to get Statistics")
+		stats["usrs"] = 0
+		stats["movs"] = 0
+		bytesStats, _ = json.Marshal(stats)
+		_ = db.UpdateDataTupleBytes(conn, "statistics", bytesStats)
 		return
 	}
-	db.UpdateDataTuple(conn, "statistics", "1")
+	// stats := map[string]string{}
+	err = json.Unmarshal(bytesStats, &stats)
+	if err != nil {
+		log.Println("Failed to decode Statistics")
+		return
+	}
+	log.Println(fmt.Sprintf("Moved %d players in %d actions", stats["usrs"], stats["movs"]))
+}
+
+// bumpStatistics ads 1 to the "movs" stats and 'moved' to the "movd"
+func bumpStatistics(moved string, s *discordgo.Session, conn *badger.DB) {
+	bytesStats, err := db.GetDataTupleBytes(conn, "statistics")
+	if err != nil {
+		log.Println("Failed to get Statistics")
+		return
+	}
+	stats := map[string]int{}
+	err = json.Unmarshal(bytesStats, &stats)
+	if err != nil {
+		log.Println("Failed to decode Statistics")
+		return
+	}
+	movedInt, _ := strconv.Atoi(moved)
+	stats["usrs"] += movedInt
+	s.UpdateStatus(0, fmt.Sprintf("Moved %d players \n ! %s help", stats["usrs"], botPrefix))
+	stats["movs"]++
+	bytesStats, _ = json.Marshal(stats)
+	err = db.UpdateDataTupleBytes(conn, "statistics", bytesStats)
+	if err != nil {
+		log.Println(err)
+		log.Println(stats)
+	}
 	return
 }

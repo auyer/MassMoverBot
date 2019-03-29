@@ -7,7 +7,7 @@
                                                                              
 
 
-Commander Multi Bot, a Discord Bot written in GO
+MassMover Bot, a Discord Bot written in GO
 %s
 %s
 _________________________________________________________________

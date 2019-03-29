@@ -2,10 +2,12 @@
 LANG:
     WelcomeAndLang : |
         [EN] Hi ! Thank you for adding this bot.
-            Remember to set your language in your guild typing \' %s lang\' and chosing one of the options.
+            Set your language in your guild typing \' %s lang\' and chosing one of the options.
+            Visit the website and add more moving power! http://massmover.github.io
 
         [PT/BR] Olá ! Obrigado por adicionar este bot.
-            Lembre-se de configurar a linguagem em sua guild digitando \' %s lang\' e escolhendo uma das opçoes.
+            Configure a linguagem em sua guild digitando \' %s lang\' e escolhendo uma das opçoes.
+            Visite o site e adicione mais níveis de poder! http://massmover.github.io
     LangSetupMessage: |  
         1 - [EN] Type \' %s lang\' followed by \'EN\' or \'1\'  and chose the English language 
 

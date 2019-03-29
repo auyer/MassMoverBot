@@ -74,10 +74,18 @@ func ConnectDB(databasePath string) (*badger.DB, error) {
 	return db, nil
 }
 
-// UpdateDataTuple is a simple querry that inserts/updates the DataTuple tuple used by FastGate.
-func UpdateDataTuple(database *badger.DB, key string, Key string) error {
+// UpdateDataTuple is a simple querry that inserts/updates the DataTuple tuple used by.
+func UpdateDataTuple(database *badger.DB, key string, value string) error {
 	return database.Update(func(txn *badger.Txn) error {
-		err := txn.Set([]byte(key), []byte(Key))
+		err := txn.Set([]byte(key), []byte(value))
+		return err
+	})
+}
+
+// UpdateDataTupleBytes is a simple querry that inserts/updates the DataTuple tuple used by.
+func UpdateDataTupleBytes(database *badger.DB, key string, value []byte) error {
+	return database.Update(func(txn *badger.Txn) error {
+		err := txn.Set([]byte(key), value)
 		return err
 	})
 }
@@ -99,6 +107,25 @@ func GetDataTuple(database *badger.DB, key string) (value string, err error) {
 		return err
 	})
 	return string(result), err
+}
+
+// GetDataTupleBytes finds an Key matching an key and returns it as a bytes.
+func GetDataTupleBytes(database *badger.DB, key string) (value []byte, err error) {
+	var result []byte
+	err = database.View(func(txn *badger.Txn) error {
+		item, err := txn.Get([]byte(key))
+		if err != nil {
+			return err
+		}
+		var val []byte
+		val, err = item.ValueCopy(val)
+		if err != nil {
+			return err
+		}
+		result = val
+		return err
+	})
+	return result, err
 }
 
 // DeleteDataTuple finds a matching Key and delets its data

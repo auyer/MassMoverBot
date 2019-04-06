@@ -87,7 +87,20 @@ func Start(commanderToken string, servantTokens []string, prefix string, DBConne
 
 func ready(s *discordgo.Session, event *discordgo.Ready) {
 	// Set the playing status.
-	s.UpdateStatus(0, botPrefix+" help")
+	bytesStats, err := db.GetDataTupleBytes(conn, "statistics")
+	if err != nil {
+		log.Println("Failed to get Statistics")
+		s.UpdateStatus(0, botPrefix+" help")
+		return
+	}
+	stats := map[string]int{}
+	err = json.Unmarshal(bytesStats, &stats)
+	if err != nil {
+		log.Println("Failed to decode Statistics")
+		s.UpdateStatus(0, botPrefix+" help")
+		return
+	}
+	s.UpdateStatus(0, fmt.Sprintf("Moved %d players \n ! %s help", stats["usrs"], botPrefix))
 }
 
 // This function will be called (due to AddHandler above) every time a new

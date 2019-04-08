@@ -9,7 +9,7 @@ This can be used to split intensive operations, or API limited opperations like 
 
 It is capable of using N "PowerUp" Bot connections to perform fast mass "User Move" operations, and the request will be executed by the ammount of bots connected to the server.
 
-![GIF: moving 28 user with 2 "powerups"](https://massmover.github.io/img/demo.gif)
+![GIF: moving 28 user with 2 "powerups"](https://raw.githubusercontent.com/auyer/MassMoverHugoPage/master/static/img/half.gif)
 
 ## Usage
 

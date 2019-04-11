@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -20,6 +21,10 @@ var servantList []*discordgo.Session
 var conn *badger.DB
 var botPrefix string
 var messages map[string]map[string]string
+
+// RegEx used to split all command parameters, considering anything between quotes as a single parameter.
+// Ex: `> move ThisChannel "That Channel"` will be processed as [">", "move", "ThisChannel", "That Channel"]
+var commandRegEx, _ = regexp.Compile(`(".*?"|\S+)`)
 
 // Close function ends the bot connection and closes its database
 func Close() {
@@ -140,51 +145,64 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if err != nil {
 		langg = "EN"
 	}
-	if strings.HasPrefix(m.Content, botPrefix+" lang") {
-		params := strings.Split(m.Content, " ") // spliting the user request
-		if len(params) == 3 {
+
+	// Split params using regex
+	params := commandRegEx.FindAllString(m.Content[1:], -1)
+	numParams := len(params)
+
+	// If no parameter was passed, show the help message
+	if numParams == 0 {
+		s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["GeneralHelp"], m.Author.Mention(), botPrefix))
+		return
+	}
+
+	if params[0] == "lang" {
+		if numParams == 2 {
 			chosenLang := utils.SelectLang(params[2])
 			db.UpdateDataTuple(conn, m.GuildID, chosenLang)
 			langg = chosenLang
 			s.ChannelMessageSend(m.ChannelID, messages[langg]["LangSet"])
 			return
 		}
+
 		s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages["LANG"]["LangSetupMessage"], botPrefix, botPrefix))
 		return
 	}
-	if strings.HasPrefix(m.Content, botPrefix) {
-		if m.Author.Bot {
-			return
-		}
-		if m.Content == botPrefix {
-			s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["GeneralHelp"], m.Author.Mention(), botPrefix))
-		} else if m.Content == botPrefix+" help" {
+
+	// Is this message from a human && Does the message have the bot prefix?
+	if !m.Author.Bot && strings.HasPrefix(m.Content, botPrefix) {
+		if params[0] == "help" {
 			s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["HelpMessage"], botPrefix, botPrefix))
-		} else if strings.HasPrefix(m.Content, botPrefix+" move") {
+			return
+		} else if params[0] == "move" {
 			workerschann := make(chan []*discordgo.Session, 1)
 			go utils.DetectServants(m.GuildID, append(servantList, s), workerschann)
+
 			guild, err := s.Guild(m.GuildID) // retrieving the server (guild) the message was originated from
 			if err != nil {
 				log.Println(err)
 				s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["NotInGuild"], m.Author.Mention()))
 				return
 			}
+
 			channs := guild.Channels // retrieving the list of channels and sorting (next line) them by position (in the users interface)
 			sort.Slice(channs[:], func(i, j int) bool {
 				return channs[i].Position < channs[j].Position
 			})
-			params := strings.Split(m.Content, " ") // spliting the user request
-			length := len(params)
-			if length == 3 {
-				log.Println("Received 3 parameter move command on " + guild.Name + " , ID: " + guild.ID + " , by :" + m.Author.ID)
-				destination, err := utils.GetChannel(channs, params[2])
+
+			if numParams == 2 {
+				log.Println("Received move command with 2 parameters on " + guild.Name + " , ID: " + guild.ID + " , by :" + m.Author.ID)
+				destination, err := utils.GetChannel(channs, params[1])
 				if err != nil {
-					s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["CantFindChannel"], params[2]))
+					s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["CantFindChannel"], params[1]))
+					return
 				}
+
 				if !utils.CheckPermissions(s, destination, m.Author.ID, discordgo.PermissionVoiceMoveMembers) {
 					s.ChannelMessageSend(m.ChannelID, messages[langg]["NoPermissionsDestination"])
 					return
 				}
+
 				num, err := mover.MoveDestination(s, <-workerschann, m, guild, botPrefix, destination)
 				if err != nil {
 					if err.Error() == "no permission origin" {
@@ -196,38 +214,46 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 					}
 					return
 				}
+
 				s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["JustMoved"], num))
 				bumpStatistics(num, s, conn)
 				return
-			} else if length == 4 {
-				log.Println("Received 4 parameter move command on " + guild.Name + " , ID: " + guild.ID + " , by :" + m.Author.ID)
+			} else if numParams == 3 {
+				log.Println("Received move command with 3 parameters on " + guild.Name + " , ID: " + guild.ID + " , by :" + m.Author.ID)
 				origin, err := utils.GetChannel(channs, params[2])
 				if err != nil {
 					s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["CantFindChannel"], params[2]))
+					return
 				}
+
 				destination, err := utils.GetChannel(channs, params[3])
 				if err != nil {
 					s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["CantFindChannel"], params[3]))
+					return
 				}
+
 				if !utils.CheckPermissions(s, origin, m.Author.ID, discordgo.PermissionVoiceMoveMembers) {
 					s.ChannelMessageSend(m.ChannelID, messages[langg]["NoPermissionsOrigin"])
 					return
 				}
+
 				if !utils.CheckPermissions(s, destination, m.Author.ID, discordgo.PermissionVoiceMoveMembers) {
 					s.ChannelMessageSend(m.ChannelID, messages[langg]["NoPermissionsDestination"])
 					return
 				}
+
 				num, err := mover.MoveOriginDestination(s, <-workerschann, m, guild, botPrefix, origin, destination)
 				if err != nil {
 					s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["JustMoved"], err.Error()))
 					log.Println(err.Error())
 					return
 				}
+
 				s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["JustMoved"], num))
 				go bumpStatistics(num, s, conn)
 				return
 			}
-			log.Println("Sending help message on " + guild.Name + " , ID: " + guild.ID)
+			log.Println("Received move command with " + strconv.Itoa(numParams) + " parameter(s) (help message) on " + guild.Name + " , ID: " + guild.ID)
 			s.ChannelMessageSend(m.ChannelID, mover.MoveHelper(channs, messages[langg]["MoveHelper"], botPrefix))
 		} else {
 			s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["EhhMessage"], m.Author.Mention(), m.Content, botPrefix))

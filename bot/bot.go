@@ -160,19 +160,6 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 
 		switch params[0] {
-		case "lang":
-			if numParams == 2 {
-				chosenLang := utils.SelectLang(params[2])
-				_ = db.UpdateDataTuple(conn, m.GuildID, chosenLang)
-				lang = chosenLang
-				_, _ = s.ChannelMessageSend(m.ChannelID, messages[lang]["LangSet"])
-			} else {
-				_, _ = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages["LANG"]["LangSetupMessage"], botPrefix, botPrefix))
-			}
-
-		case "help":
-			_, _ = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[lang]["HelpMessage"], botPrefix, botPrefix))
-
 		case "move":
 			workerschann := make(chan []*discordgo.Session, 1)
 			go utils.DetectServants(m.GuildID, append(servantList, s), workerschann)
@@ -252,6 +239,19 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			} else {
 				log.Println("Received move command with " + strconv.Itoa(numParams) + " parameter(s) (help message) on " + guild.Name + " , ID: " + guild.ID)
 				_, _ = s.ChannelMessageSend(m.ChannelID, mover.MoveHelper(channs, messages[lang]["MoveHelper"], botPrefix))
+			}
+
+		case "help":
+			_, _ = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[lang]["HelpMessage"], botPrefix, botPrefix))
+
+		case "lang":
+			if numParams == 2 {
+				chosenLang := utils.SelectLang(params[2])
+				_ = db.UpdateDataTuple(conn, m.GuildID, chosenLang)
+				lang = chosenLang
+				_, _ = s.ChannelMessageSend(m.ChannelID, messages[lang]["LangSet"])
+			} else {
+				_, _ = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages["LANG"]["LangSetupMessage"], botPrefix, botPrefix))
 			}
 
 		default:

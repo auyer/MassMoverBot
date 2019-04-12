@@ -26,6 +26,9 @@ var messages map[string]map[string]string
 // Ex: `> move ThisChannel "That Channel"` will be processed as [">", "move", "ThisChannel", "That Channel"]
 var commandRegEx, _ = regexp.Compile(`(".*?"|\S+)`)
 
+// RegEx used to remove starting and ending quotes from the parameters
+var parameterQuotesRegEx, _ = regexp.Compile(`(^"|"$)`)
+
 // Close function ends the bot connection and closes its database
 func Close() {
 	log.Println("Closing")
@@ -159,6 +162,10 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 
+		for i := 0; i < numParams; i++ {
+			params[i] = parameterQuotesRegEx.ReplaceAllString(params[i], "")
+		}
+
 		switch params[0] {
 		case "move":
 			workerschann := make(chan []*discordgo.Session, 1)
@@ -181,6 +188,7 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				destination, err := utils.GetChannel(channs, params[1])
 				if err != nil {
 					_, _ = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[lang]["CantFindChannel"], params[1]))
+					return
 				}
 
 				if !utils.CheckPermissions(s, destination, m.Author.ID, discordgo.PermissionVoiceMoveMembers) {
@@ -205,15 +213,15 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				return
 			} else if numParams == 3 {
 				log.Println("Received move command with 3 parameters on " + guild.Name + " , ID: " + guild.ID + " , by :" + m.Author.ID)
-				origin, err := utils.GetChannel(channs, params[2])
+				origin, err := utils.GetChannel(channs, params[1])
 				if err != nil {
-					_, _ = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[lang]["CantFindChannel"], params[2]))
+					_, _ = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[lang]["CantFindChannel"], params[1]))
 					return
 				}
 
-				destination, err := utils.GetChannel(channs, params[3])
+				destination, err := utils.GetChannel(channs, params[2])
 				if err != nil {
-					_, _ = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[lang]["CantFindChannel"], params[3]))
+					_, _ = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[lang]["CantFindChannel"], params[2]))
 					return
 				}
 

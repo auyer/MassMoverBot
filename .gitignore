@@ -1,0 +1,6 @@
+### Go template
+# Binaries for programs and plugins
+*.exe
+
+# IntelliJ project files
+.idea

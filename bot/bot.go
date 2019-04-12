@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -21,12 +22,19 @@ var conn *badger.DB
 var botPrefix string
 var messages map[string]map[string]string
 
+// RegEx used to split all command parameters, considering anything between quotes as a single parameter.
+// Ex: `> move ThisChannel "That Channel"` will be processed as [">", "move", "ThisChannel", "That Channel"]
+var commandRegEx, _ = regexp.Compile(`(".*?"|\S+)`)
+
+// RegEx used to remove starting and ending quotes from the parameters
+var parameterQuotesRegEx, _ = regexp.Compile(`(^"|"$)`)
+
 // Close function ends the bot connection and closes its database
 func Close() {
 	log.Println("Closing")
-	commander.Close()
+	_ = commander.Close()
 	for _, servant := range servantList {
-		servant.Close()
+		_ = servant.Close()
 	}
 }
 
@@ -54,7 +62,7 @@ func Start(commanderToken string, servantTokens []string, prefix string, DBConne
 			log.Println("Error creating Discord session: ", err)
 			return
 		}
-		setupBot(servant)
+		_, _ = setupBot(servant)
 		servantList = append(servantList, servant)
 
 	}
@@ -87,7 +95,7 @@ func Start(commanderToken string, servantTokens []string, prefix string, DBConne
 
 func ready(s *discordgo.Session, event *discordgo.Ready) {
 	// Set the playing status.
-	s.UpdateStatus(0, botPrefix+" help")
+	_ = s.UpdateStatus(0, botPrefix+" help")
 }
 
 // This function will be called (due to AddHandler above) every time a new
@@ -103,10 +111,10 @@ func guildCreate(s *discordgo.Session, event *discordgo.GuildCreate) {
 		if err == badger.ErrKeyNotFound || val == "" {
 			err = askMember(s, event.Guild.OwnerID, fmt.Sprintf(messages["LANG"]["WelcomeAndLang"], botPrefix, botPrefix))
 			if err != nil {
-				log.Println("Failed to send mesage to owner.")
+				log.Println("Failed to send message to owner.")
 				return
 			}
-			db.UpdateDataTuple(conn, "M:"+event.Guild.ID, "1")
+			_ = db.UpdateDataTuple(conn, "M:"+event.Guild.ID, "1")
 		}
 	}
 }
@@ -119,7 +127,7 @@ func guildDelete(s *discordgo.Session, event *discordgo.GuildDelete) {
 	log.Println("Left " + event.Guild.Name + " (" + event.Guild.ID + ")")
 	_, err := db.GetDataTuple(conn, event.Guild.ID)
 	if err == nil {
-		db.DeleteDataTuple(conn, event.Guild.ID)
+		_ = db.DeleteDataTuple(conn, event.Guild.ID)
 	}
 }
 
@@ -136,101 +144,126 @@ func askMember(s *discordgo.Session, owner string, message string) error {
 
 // messageHandler function will be called when the bot reads a message
 func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
-	langg, err := db.GetDataTuple(conn, m.GuildID)
+	lang, err := db.GetDataTuple(conn, m.GuildID)
 	if err != nil {
-		langg = "EN"
+		lang = "EN"
 	}
-	if strings.HasPrefix(m.Content, botPrefix+" lang") {
-		params := strings.Split(m.Content, " ") // spliting the user request
-		if len(params) == 3 {
-			chosenLang := utils.SelectLang(params[2])
-			db.UpdateDataTuple(conn, m.GuildID, chosenLang)
-			langg = chosenLang
-			s.ChannelMessageSend(m.ChannelID, messages[langg]["LangSet"])
+
+	// Is this message from a human && Does the message have the bot prefix?
+	if !m.Author.Bot && strings.HasPrefix(m.Content, botPrefix) {
+
+		// Split params using regex
+		params := commandRegEx.FindAllString(m.Content[1:], -1)
+		numParams := len(params)
+
+		// If no parameter was passed, show the help message
+		if numParams == 0 {
+			_, _ = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[lang]["GeneralHelp"], m.Author.Mention(), botPrefix))
 			return
 		}
-		s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages["LANG"]["LangSetupMessage"], botPrefix, botPrefix))
-		return
-	}
-	if strings.HasPrefix(m.Content, botPrefix) {
-		if m.Author.Bot {
-			return
+
+		for i := 0; i < numParams; i++ {
+			params[i] = parameterQuotesRegEx.ReplaceAllString(params[i], "")
 		}
-		if m.Content == botPrefix {
-			s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["GeneralHelp"], m.Author.Mention(), botPrefix))
-		} else if m.Content == botPrefix+" help" {
-			s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["HelpMessage"], botPrefix, botPrefix))
-		} else if strings.HasPrefix(m.Content, botPrefix+" move") {
+
+		switch params[0] {
+		case "move":
 			workerschann := make(chan []*discordgo.Session, 1)
 			go utils.DetectServants(m.GuildID, append(servantList, s), workerschann)
+
 			guild, err := s.Guild(m.GuildID) // retrieving the server (guild) the message was originated from
 			if err != nil {
 				log.Println(err)
-				s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["NotInGuild"], m.Author.Mention()))
+				_, _ = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[lang]["NotInGuild"], m.Author.Mention()))
 				return
 			}
+
 			channs := guild.Channels // retrieving the list of channels and sorting (next line) them by position (in the users interface)
 			sort.Slice(channs[:], func(i, j int) bool {
 				return channs[i].Position < channs[j].Position
 			})
-			params := strings.Split(m.Content, " ") // spliting the user request
-			length := len(params)
-			if length == 3 {
-				log.Println("Received 3 parameter move command on " + guild.Name + " , ID: " + guild.ID + " , by :" + m.Author.ID)
-				destination, err := utils.GetChannel(channs, params[2])
+
+			if numParams == 2 {
+				log.Println("Received move command with 2 parameters on " + guild.Name + " , ID: " + guild.ID + " , by :" + m.Author.ID)
+				destination, err := utils.GetChannel(channs, params[1])
 				if err != nil {
-					s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["CantFindChannel"], params[2]))
-				}
-				if !utils.CheckPermissions(s, destination, m.Author.ID, discordgo.PermissionVoiceMoveMembers) {
-					s.ChannelMessageSend(m.ChannelID, messages[langg]["NoPermissionsDestination"])
+					_, _ = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[lang]["CantFindChannel"], params[1]))
 					return
 				}
+
+				if !utils.CheckPermissions(s, destination, m.Author.ID, discordgo.PermissionVoiceMoveMembers) {
+					_, _ = s.ChannelMessageSend(m.ChannelID, messages[lang]["NoPermissionsDestination"])
+					return
+				}
+
 				num, err := mover.MoveDestination(s, <-workerschann, m, guild, botPrefix, destination)
 				if err != nil {
 					if err.Error() == "no permission origin" {
-						s.ChannelMessageSend(m.ChannelID, messages[langg]["NoPermissionsOrigin"])
+						_, _ = s.ChannelMessageSend(m.ChannelID, messages[lang]["NoPermissionsOrigin"])
 					} else if err.Error() == "cant find user" {
-						s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["CantFindUser"], m.Author.Mention(), botPrefix))
+						_, _ = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[lang]["CantFindUser"], m.Author.Mention(), botPrefix))
 					} else {
-						s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["SorryBut"], err.Error()))
+						_, _ = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[lang]["SorryBut"], err.Error()))
 					}
 					return
 				}
-				s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["JustMoved"], num))
+
+				_, _ = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[lang]["JustMoved"], num))
 				bumpStatistics(num, s, conn)
 				return
-			} else if length == 4 {
-				log.Println("Received 4 parameter move command on " + guild.Name + " , ID: " + guild.ID + " , by :" + m.Author.ID)
-				origin, err := utils.GetChannel(channs, params[2])
+			} else if numParams == 3 {
+				log.Println("Received move command with 3 parameters on " + guild.Name + " , ID: " + guild.ID + " , by :" + m.Author.ID)
+				origin, err := utils.GetChannel(channs, params[1])
 				if err != nil {
-					s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["CantFindChannel"], params[2]))
+					_, _ = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[lang]["CantFindChannel"], params[1]))
+					return
 				}
-				destination, err := utils.GetChannel(channs, params[3])
+
+				destination, err := utils.GetChannel(channs, params[2])
 				if err != nil {
-					s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["CantFindChannel"], params[3]))
+					_, _ = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[lang]["CantFindChannel"], params[2]))
+					return
 				}
+
 				if !utils.CheckPermissions(s, origin, m.Author.ID, discordgo.PermissionVoiceMoveMembers) {
-					s.ChannelMessageSend(m.ChannelID, messages[langg]["NoPermissionsOrigin"])
+					_, _ = s.ChannelMessageSend(m.ChannelID, messages[lang]["NoPermissionsOrigin"])
 					return
 				}
+
 				if !utils.CheckPermissions(s, destination, m.Author.ID, discordgo.PermissionVoiceMoveMembers) {
-					s.ChannelMessageSend(m.ChannelID, messages[langg]["NoPermissionsDestination"])
+					_, _ = s.ChannelMessageSend(m.ChannelID, messages[lang]["NoPermissionsDestination"])
 					return
 				}
+
 				num, err := mover.MoveOriginDestination(s, <-workerschann, m, guild, botPrefix, origin, destination)
 				if err != nil {
-					s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["JustMoved"], err.Error()))
+					_, _ = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[lang]["JustMoved"], err.Error()))
 					log.Println(err.Error())
 					return
 				}
-				s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["JustMoved"], num))
+
+				_, _ = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[lang]["JustMoved"], num))
 				go bumpStatistics(num, s, conn)
-				return
+			} else {
+				log.Println("Received move command with " + strconv.Itoa(numParams) + " parameter(s) (help message) on " + guild.Name + " , ID: " + guild.ID)
+				_, _ = s.ChannelMessageSend(m.ChannelID, mover.MoveHelper(channs, messages[lang]["MoveHelper"], botPrefix))
 			}
-			log.Println("Sending help message on " + guild.Name + " , ID: " + guild.ID)
-			s.ChannelMessageSend(m.ChannelID, mover.MoveHelper(channs, messages[langg]["MoveHelper"], botPrefix))
-		} else {
-			s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[langg]["EhhMessage"], m.Author.Mention(), m.Content, botPrefix))
+
+		case "help":
+			_, _ = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[lang]["HelpMessage"], botPrefix, botPrefix))
+
+		case "lang":
+			if numParams == 2 {
+				chosenLang := utils.SelectLang(params[1])
+				_ = db.UpdateDataTuple(conn, m.GuildID, chosenLang)
+				lang = chosenLang
+				_, _ = s.ChannelMessageSend(m.ChannelID, messages[lang]["LangSet"])
+			} else {
+				_, _ = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages["LANG"]["LangSetupMessage"], botPrefix, botPrefix))
+			}
+
+		default:
+			_, _ = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[lang]["EhhMessage"], m.Author.Mention(), m.Content, botPrefix))
 		}
 	}
 }
@@ -256,7 +289,7 @@ func GetAndInitStats(conn *badger.DB) {
 	log.Println(fmt.Sprintf("Moved %d players in %d actions", stats["usrs"], stats["movs"]))
 }
 
-// bumpStatistics ads 1 to the "movs" stats and 'moved' to the "movd"
+// bumpStatistics adds 1 to the "movs" stats and 'moved' to the "movd"
 func bumpStatistics(moved string, s *discordgo.Session, conn *badger.DB) {
 	bytesStats, err := db.GetDataTupleBytes(conn, "statistics")
 	if err != nil {
@@ -271,7 +304,7 @@ func bumpStatistics(moved string, s *discordgo.Session, conn *badger.DB) {
 	}
 	movedInt, _ := strconv.Atoi(moved)
 	stats["usrs"] += movedInt
-	s.UpdateStatus(0, fmt.Sprintf("Moved %d players \n ! %s help", stats["usrs"], botPrefix))
+	_ = s.UpdateStatus(0, fmt.Sprintf("Moved %d players \n ! %s help", stats["usrs"], botPrefix))
 	stats["movs"]++
 	bytesStats, _ = json.Marshal(stats)
 	err = db.UpdateDataTupleBytes(conn, "statistics", bytesStats)

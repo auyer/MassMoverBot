@@ -43,7 +43,6 @@ func setupBot(bot *discordgo.Session) (string, error) {
 	bot.AddHandler(ready)
 	u, err := commander.User("@me")
 	if err != nil {
-		log.Println("Error creating Discord session: ", err)
 		return "", err
 	}
 	return u.ID, nil
@@ -56,22 +55,29 @@ func Start(commanderToken string, servantTokens []string, prefix string, DBConne
 	conn = DBConnection
 	var err error
 	commander, err = discordgo.New("Bot " + commanderToken)
+	if err != nil {
+		log.Println("Error creating main session: ", err)
+		return
+	}
 	for _, servantToken := range servantTokens {
 		servant, err := discordgo.New("Bot " + servantToken)
 		if err != nil {
-			log.Println("Error creating Discord session: ", err)
+			log.Println("Error creating powerup session: ", err)
 			return
 		}
 		_, _ = setupBot(servant)
+		if err != nil {
+			log.Println("Error setting powerup session: ", err)
+			return
+		}
 		servantList = append(servantList, servant)
 
 	}
-
 	_, err = setupBot(commander)
 	commander.AddHandler(guildCreate)
 	commander.AddHandler(guildDelete)
 	if err != nil {
-		log.Println("Error creating Discord session: ", err)
+		log.Println("Error setting up main session: ", err)
 		return
 	}
 
@@ -80,13 +86,13 @@ func Start(commanderToken string, servantTokens []string, prefix string, DBConne
 	for _, s := range servantList {
 		err = s.Open()
 		if err != nil {
-			fmt.Println("Error Opening Bot: ", err)
+			fmt.Println("Error Opening powerup session: ", err)
 		}
 	}
 
 	err = commander.Open()
 	if err != nil {
-		log.Println("Error creating Discord session: ", err)
+		log.Println("Error oppening main Discord session: ", err)
 		return
 	}
 	log.Println("Bot is running!")

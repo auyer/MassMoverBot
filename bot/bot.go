@@ -254,7 +254,7 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		case "lang":
 			if numParams == 2 {
-				chosenLang := utils.SelectLang(params[2])
+				chosenLang := utils.SelectLang(params[1])
 				_ = db.UpdateDataTuple(conn, m.GuildID, chosenLang)
 				lang = chosenLang
 				_, _ = s.ChannelMessageSend(m.ChannelID, messages[lang]["LangSet"])

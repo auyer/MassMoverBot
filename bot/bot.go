@@ -65,7 +65,7 @@ func Start(commanderToken string, servantTokens []string, prefix string, DBConne
 			log.Println("Error creating powerup session: ", err)
 			return
 		}
-		_, _ = setupBot(servant)
+		_, err = setupBot(servant)
 		if err != nil {
 			log.Println("Error setting powerup session: ", err)
 			return
@@ -172,7 +172,7 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			params[i] = parameterQuotesRegEx.ReplaceAllString(params[i], "")
 		}
 
-		switch params[0] {
+		switch strings.ToLower(params[0]) {
 		case "move":
 			workerschann := make(chan []*discordgo.Session, 1)
 			go utils.DetectServants(m.GuildID, append(servantList, s), workerschann)

@@ -28,8 +28,7 @@ func MoveDestination(s *discordgo.Session, workers []*discordgo.Session, m *disc
 
 // MoveOriginDestination function moves discord users
 func MoveOriginDestination(s *discordgo.Session, workers []*discordgo.Session, m *discordgo.MessageCreate, guild *discordgo.Guild, prefix string, origin string, destination string) (string, error) {
-	num, err := MoveMembers(workers, guild, origin, destination)
-	return num, err
+	return MoveMembers(workers, guild, origin, destination)
 }
 
 // MoveMembers wraps MoveAndRetry with councurrent calls and error reporting.

@@ -3,11 +3,13 @@ LANG:
     WelcomeAndLang : |
         [EN] Hi ! Thank you for adding this bot.
             Set your language in your guild typing \' %s lang\' and chosing one of the options.
-            Visit the website and add more moving power! http://massmover.github.io
+            Visit the website and add more moving power!
 
         [PT/BR] Olá ! Obrigado por adicionar este bot.
             Configure a linguagem em sua guild digitando \' %s lang\' e escolhendo uma das opçoes.
-            Visite o site e adicione mais níveis de poder! http://massmover.github.io
+            Visite o site e adicione mais níveis de poder! 
+            
+        http://massmover.github.io
     LangSetupMessage: |  
         1 - [EN] Type \' %s lang\' followed by \'EN\' or \'1\'  and chose the English language 
 
@@ -38,6 +40,7 @@ EN :
     NoPermissionsDestination: "Sorry, but you dont have permissions to move to the Destination channel."
     NoPermissionsOrigin: "Sorry, but you dont have permissions to move from the Origin channel."
     SorryBut: "Sorry, but: %s"
+    OriginDestination: "Origin and destination are the same."
 PT :
     LangSet : "Você escolheu a Língua Portuguesa [PT/BR]. Você sempre proderá mudar usando o mesmo comando."
     CantFindChannel: "Desculpe, eu não consigo achar o canal %s."
@@ -64,3 +67,4 @@ PT :
     NoPermissionsDestination: "Desculpe, mas você não tem permissão para mover para o canal de Destino."
     NoPermissionsOrigin: "Desculpe, mas você não tem permissão para mover do canal de Origem."
     SorryBut: "Desculpe, mas: %s"
+    OriginDestination: "Origem e destino são iguais."

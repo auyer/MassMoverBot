@@ -209,7 +209,7 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 					} else if err.Error() == "cant find user" {
 						_, _ = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[lang]["CantFindUser"], m.Author.Mention(), botPrefix))
 					} else {
-						_, _ = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[lang]["SorryBut"], err.Error()))
+						_, _ = s.ChannelMessageSend(m.ChannelID, messages[lang]["OriginDestination"])
 					}
 					return
 				}
@@ -243,7 +243,7 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 				num, err := mover.MoveOriginDestination(s, <-workerschann, m, guild, botPrefix, origin, destination)
 				if err != nil {
-					_, _ = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(messages[lang]["JustMoved"], err.Error()))
+					_, _ = s.ChannelMessageSend(m.ChannelID, messages[lang]["OriginDestination"])
 					log.Println(err.Error())
 					return
 				}

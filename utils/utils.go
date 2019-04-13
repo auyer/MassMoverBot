@@ -2,16 +2,12 @@ package utils
 
 import (
 	"errors"
+	"sort"
 	"strconv"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
 )
-
-var langs = map[int]string{
-	1: "EN",
-	2: "PT",
-}
 
 // GetChannel retrieves the channel ID by the name or position ID
 /*
@@ -24,11 +20,12 @@ Outputs: channel ID string, error
 func GetChannel(channs []*discordgo.Channel, channelNameOrID string) (string, error) {
 	var channel string
 	var err error
-	var intparam int
-	if intparam, err = strconv.Atoi(channelNameOrID); err != nil {
+
+	channelID, err := strconv.Atoi(channelNameOrID)
+	if err != nil || channelID > 1000 {
 		channel, err = chanByName(channs, channelNameOrID)
 	} else {
-		channel, err = chanByPosNum(channs, intparam)
+		channel, err = chanByPosNum(channs, channelID-1)
 	}
 	if err != nil {
 		return "", err
@@ -45,16 +42,14 @@ Inputs:
 Outputs: id string, error
 */
 func chanByPosNum(channs []*discordgo.Channel, posNum int) (string, error) {
-	i := 0
 	for _, chann := range channs {
 		if chann.Type == 2 {
-			i++
-			if i == posNum {
+			if chann.Position == posNum {
 				return chann.ID, nil
 			}
 		}
 	}
-	return "", errors.New("Not Found")
+	return "", errors.New("not nound")
 }
 
 // chanByName retrieves channel id by name. The comparison is case insensitive.
@@ -74,7 +69,7 @@ func chanByName(channs []*discordgo.Channel, name string) (string, error) {
 			}
 		}
 	}
-	return "", errors.New("Not Found")
+	return "", errors.New("not found")
 }
 
 // CheckPermissions checks the permission for a User in a chennel
@@ -107,7 +102,7 @@ Inputs:
 Output is sent in the rchan channel
 */
 func DetectServants(guildID string, servants []*discordgo.Session, rchan chan []*discordgo.Session) {
-	workers := []*discordgo.Session{}
+	var workers []*discordgo.Session
 	for _, servant := range servants {
 		_, err := servant.State.Guild(guildID)
 		if err == nil {
@@ -117,29 +112,27 @@ func DetectServants(guildID string, servants []*discordgo.Session, rchan chan []
 	rchan <- workers
 }
 
-// SelectLang selects a language code based on number or string code
+// MoveHelper prints the help text for this command
 /*
-Input:
-	choice string
-Output:
-	language string
+Inputs:
+	voiceChannels []*discordgo.Channel : list of all channels in the server (used to list the numbers)
+	prefix string: prefix used to call the bot (used to print in the message)
+
+Outputs: message string
 */
-func SelectLang(choice string) string {
-	if intparam, err := strconv.Atoi(choice); err == nil {
-		choice := langs[intparam]
-		if choice != "" {
-			return choice
+func ListChannelsForHelpMessage(channels []*discordgo.Channel) string {
+	sort.Slice(channels[:], func(i, j int) bool {
+		return channels[i].Position < channels[j].Position
+	})
+
+	i := 0
+	channelHelpList := ""
+	for _, channel := range channels {
+		if channel.Type == discordgo.ChannelTypeGuildVoice {
+			i++
+			channelHelpList = channelHelpList + strconv.Itoa(i) + " ) " + channel.Name + "\n"
 		}
-		return langs[1]
 	}
-	switch strings.ToUpper(choice) {
-	case "EN":
-		return "EN"
-	case "PT":
-		return "PT"
-	case "BR":
-		return "PT"
-	default:
-		return "EN"
-	}
+
+	return channelHelpList
 }

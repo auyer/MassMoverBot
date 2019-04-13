@@ -2,9 +2,7 @@ package mover
 
 import (
 	"errors"
-	"fmt"
 	"log"
-	"sort"
 	"strconv"
 	"sync"
 	"time"
@@ -82,27 +80,4 @@ func MoveAndRetry(s *discordgo.Session, guildID, userID, dest string, retry int)
 		MoveAndRetry(s, guildID, userID, dest, retry-1)
 	}
 	return nil
-}
-
-// MoveHelper prints the help text for this command
-/*
-Inputs:
-	chann []*discordgo.Channel : list of all channels in the server (used to list the numbers)
-	prefix string: prefix used to call the bot (used to print in the message)
-
-Outputs: message string
-*/
-func MoveHelper(channs []*discordgo.Channel, message, prefix string) string {
-	sort.Slice(channs[:], func(i, j int) bool {
-		return channs[i].Position < channs[j].Position
-	})
-	i := 0
-	channelString := ""
-	for _, chann := range channs {
-		if chann.Type == 2 {
-			i++
-			channelString = channelString + strconv.Itoa(i) + " ) " + chann.Name + "\n"
-		}
-	}
-	return fmt.Sprintf(message, prefix, prefix, prefix, channelString)
 }

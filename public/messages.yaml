@@ -81,21 +81,18 @@ PT:
 
     Lista de canais disponíveis \:
     %s
-
-
-  539/5000
   SummonHelp: |
     O recurso de convocação moverá todos os usuários de todos os canais de voz para o canal especificado.
 
-    %ssummon
+    %s summon
     - Exibir esta mensagem de ajuda e a lista de canais disponíveis
 
-    %ssummon #
-    %ssummon <channel_name>
+    %s summon #
+    %s summon <channel_name>
     - Mova todos os usuários de todos os canais de voz para o canal especificado. Ignorando usuários do canal AFK
 
-    %ssummon # 1
-    %ssummon <channel_name> 1
+    %s summon # 1
+    %s summon <channel_name> 1
     - Mova todos os usuários de todos os canais de voz para o canal especificado. Incluindo usuários do canal AFK.
   NoPermissionsDestination: "Desculpe, mas você não tem permissão para mover para o canal de Destino."
   NoPermissionsOrigin: "Desculpe, mas você não tem permissão para mover do canal de Origem."

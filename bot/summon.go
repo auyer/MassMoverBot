@@ -1,24 +1,23 @@
-package summon
+package bot
 
 import (
 	"errors"
 	"fmt"
-	"github.com/auyer/massmoverbot/config"
-	"github.com/auyer/massmoverbot/locale"
-	"github.com/auyer/massmoverbot/mover"
-	"github.com/auyer/massmoverbot/utils"
-	"github.com/bwmarrin/discordgo"
 	"log"
 	"strconv"
 	"sync"
+
+	"github.com/auyer/massmoverbot/mover"
+	"github.com/auyer/massmoverbot/utils"
+	"github.com/bwmarrin/discordgo"
 )
 
-// MoveDestination function moves discord users
-func Summon(s *discordgo.Session, m *discordgo.MessageCreate, params []string) (string, error) {
+// Summon command moves all users to specified channel
+func (bot *Bot) Summon(m *discordgo.MessageCreate, params []string) (string, error) {
 	workersChannel := make(chan []*discordgo.Session, 1)
-	go utils.DetectServants(m.GuildID, append(config.ServantList, s), workersChannel)
+	go utils.DetectServants(m.GuildID, append(bot.PowerupSessions, bot.CommanderSession), workersChannel)
 
-	guild, _ := s.Guild(m.GuildID)
+	guild, _ := bot.CommanderSession.Guild(m.GuildID)
 
 	// Get the Authors current voice channel
 	var destination string
@@ -29,16 +28,16 @@ func Summon(s *discordgo.Session, m *discordgo.MessageCreate, params []string) (
 		}
 	}
 
-	guildLocale := locale.Messages[utils.GetGuildLocale(m)]
+	guildLocale := bot.Messages[utils.GetGuildLocale(bot.DB, m)]
 	// Check if the Authors channel exists
 	if destination == "" {
-		_, _ = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(guildLocale["CantFindUser"], m.Author.Username))
+		_, _ = bot.CommanderSession.ChannelMessageSend(m.ChannelID, fmt.Sprintf(guildLocale["CantFindUser"], m.Author.Username))
 		return "", errors.New("user not connected to any voice channel")
 	}
 
 	// Check Authors permission for voice channel
-	if !utils.CheckPermissions(s, destination, m.Author.ID, discordgo.PermissionVoiceMoveMembers) {
-		_, _ = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(guildLocale["NoPermissionsDestination"]))
+	if !utils.CheckPermissions(bot.CommanderSession, destination, m.Author.ID, discordgo.PermissionVoiceMoveMembers) {
+		_, _ = bot.CommanderSession.ChannelMessageSend(m.ChannelID, fmt.Sprintf(guildLocale["NoPermissionsDestination"]))
 		return "", errors.New("no permission destination")
 	}
 
@@ -46,7 +45,7 @@ func Summon(s *discordgo.Session, m *discordgo.MessageCreate, params []string) (
 	if numParams == 2 {
 		origin, err := getOrigin(guild.Channels, params[1])
 		if err != nil {
-			_, _ = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(guildLocale["CantFindChannel"], params[1]))
+			_, _ = bot.CommanderSession.ChannelMessageSend(m.ChannelID, fmt.Sprintf(guildLocale["CantFindChannel"], params[1]))
 			return "", err
 		}
 
@@ -54,13 +53,13 @@ func Summon(s *discordgo.Session, m *discordgo.MessageCreate, params []string) (
 	} else if numParams == 3 && params[2] == "1" {
 		origin, err := getOrigin(guild.Channels, params[1])
 		if err != nil {
-			_, _ = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(guildLocale["CantFindChannel"], params[1]))
+			_, _ = bot.CommanderSession.ChannelMessageSend(m.ChannelID, fmt.Sprintf(guildLocale["CantFindChannel"], params[1]))
 			return "", err
 		}
 
 		return moveOriginDestination(workersChannel, guild, origin, destination, true)
 	} else {
-		_, _ = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(guildLocale["SummonHelp"], config.Config.BotPrefix, config.Config.BotPrefix, config.Config.BotPrefix, config.Config.BotPrefix, config.Config.BotPrefix, utils.ListChannelsForHelpMessage(guild.Channels)))
+		_, _ = bot.CommanderSession.ChannelMessageSend(m.ChannelID, fmt.Sprintf(guildLocale["SummonHelp"], bot.Prefix, bot.Prefix, bot.Prefix, bot.Prefix, bot.Prefix, utils.ListChannelsForHelpMessage(guild.Channels)))
 	}
 
 	return "", nil

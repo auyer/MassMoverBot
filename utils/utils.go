@@ -103,10 +103,10 @@ Output is sent in the rchan channel
 */
 func DetectServants(guildID string, servants []*discordgo.Session, rchan chan []*discordgo.Session) {
 	var workers []*discordgo.Session
-	for _, servant := range servants {
-		_, err := servant.State.Guild(guildID)
+	for _, powerup := range servants {
+		_, err := powerup.State.Guild(guildID)
 		if err == nil {
-			workers = append(workers, servant)
+			workers = append(workers, powerup)
 		}
 	}
 	rchan <- workers
@@ -135,4 +135,14 @@ func ListChannelsForHelpMessage(channels []*discordgo.Channel) string {
 	}
 
 	return channelHelpList
+}
+
+// AskMember function is used to send a private message to a guild member
+func AskMember(s *discordgo.Session, member string, message string) error {
+	c, err := s.UserChannelCreate(member)
+	if err != nil {
+		return err
+	}
+	_, err = s.ChannelMessageSend(c.ID, message) // event.Guild.OwnerID
+	return err
 }

@@ -1,11 +1,12 @@
 package utils
 
 import (
-	"github.com/auyer/massmoverbot/config"
-	"github.com/auyer/massmoverbot/db"
-	"github.com/bwmarrin/discordgo"
 	"strconv"
 	"strings"
+
+	"github.com/auyer/massmoverbot/db"
+	"github.com/bwmarrin/discordgo"
+	"github.com/dgraph-io/badger"
 )
 
 var langs = map[int]string{
@@ -39,8 +40,8 @@ Output:
 	}
 }
 
-func GetGuildLocale(m *discordgo.MessageCreate) string {
-	lang, err := db.GetDataTuple(config.Conn, m.GuildID)
+func GetGuildLocale(conn *badger.DB, m *discordgo.MessageCreate) string {
+	lang, err := db.GetDataTuple(conn, m.GuildID)
 	if err != nil {
 		lang = "EN"
 	}

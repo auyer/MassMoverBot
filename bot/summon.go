@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/auyer/massmoverbot/mover"
 	"github.com/auyer/massmoverbot/utils"
@@ -34,7 +35,7 @@ func (bot *Bot) Summon(m *discordgo.MessageCreate, params []string) (string, err
 		afk := false
 		if numParams == 3 {
 			log.Println("Received summon command with 3 parameters on " + guild.Name + " , ID: " + guild.ID + " , by :" + m.Author.ID)
-			if params[2] != "afk" {
+			if strings.ToLower(params[2]) != "afk" {
 				_, _ = bot.CommanderSession.ChannelMessageSend(m.ChannelID, fmt.Sprintf(bot.Messages[utils.GetGuildLocale(bot.DB, m)]["SummonHelp"], bot.Prefix, bot.Prefix, bot.Prefix, bot.Prefix, bot.Prefix, utils.ListChannelsForHelpMessage(guild.Channels)))
 
 				return "", nil

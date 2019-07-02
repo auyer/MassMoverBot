@@ -36,24 +36,18 @@ EN:
     %smove *origin* *destination* - Move all users from *origin* to the *destination*
     PS.\: *origin* and *destination* can be the channels number or the channels name.
 
-    List of available channels :
+    List of available channels \:
     %s
   SummonHelp: |
     The summon feature will move all users from all voice channels to the specified channel.
 
-    %ssummon
-    - Display this help message and the list of available channels
+    %s summon - Display this help message and the list of available channels.
+    %s summon all - Move all users from all channels to your current channel.
+    %s summon all afk - Move all users from all channels to your current channel. Even from the AFK channel.
+    %s summon *destination* - Move all users from all channels to the *destination* channel.
+    %s summon *destination* afk - Move all users from all channels to the *destination* channel. Even from the AFK channel.
 
-    %ssummon #
-    %ssummon <channel_name>
-    - Move all users from all voice channels to the specified channel. Ignoring AFK channel users
-
-    %ssummon # 1
-    %ssummon <channel_name> 1
-    - Move all users from all voice channels to the specified channel. Including AFK channel users.
-
-    List of available channels :
-    0) ALL CHANNELS!
+    List of available channels \:
     %s
   NoPermissionsDestination: "Sorry, but you dont have permissions to move to the Destination channel."
   NoPermissionsOrigin: "Sorry, but you dont have permissions to move from the Origin channel."
@@ -84,16 +78,14 @@ PT:
   SummonHelp: |
     O recurso de convocação moverá todos os usuários de todos os canais de voz para o canal especificado.
 
-    %s summon
-    - Exibir esta mensagem de ajuda e a lista de canais disponíveis
-
-    %s summon #
-    %s summon <channel_name>
-    - Mova todos os usuários de todos os canais de voz para o canal especificado. Ignorando usuários do canal AFK
-
-    %s summon # 1
-    %s summon <channel_name> 1
-    - Mova todos os usuários de todos os canais de voz para o canal especificado. Incluindo usuários do canal AFK.
+    %s summon - Exibir esta mensagem de ajuda e a lista de canais disponíveis.
+    %s summon all - Mova todos os usuários de todos os canais de voz para o seu canal.
+    %s summon all afk - Mova todos os usuários de todos os canais de voz para o seu canal. Incluindo usuários do canal AFK.
+    %s summon *destino* - Mova todos os usuários de todos os canais de voz para o canal especificado.
+    %s summon *destino* afk - Mova todos os usuários de todos os canais de voz para o canal especificado. Incluindo usuários do canal AFK.
+    
+    Lista de canais disponíveis \:
+    %s
   NoPermissionsDestination: "Desculpe, mas você não tem permissão para mover para o canal de Destino."
   NoPermissionsOrigin: "Desculpe, mas você não tem permissão para mover do canal de Origem."
   SorryBut: "Desculpe, mas: %s"

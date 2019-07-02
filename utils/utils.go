@@ -9,6 +9,24 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
+// GetUserCurrentChannel find the voice channel id for a connected user. Returns "" in case the user cant be found.
+/*
+Inputs:
+	s *discordgo.Session : a bot session in the guild
+	userID : the ID of the user
+	guild *discordgo.Guild : the guild where to operate this function
+
+Outputs: channel ID string, error
+*/
+func GetUserCurrentChannel(s *discordgo.Session, userID string, guild *discordgo.Guild) string {
+	for _, member := range guild.VoiceStates {
+		if member.UserID == userID {
+			return member.ChannelID
+		}
+	}
+	return ""
+}
+
 // GetChannel retrieves the channel ID by the name or position ID
 /*
 Inputs:

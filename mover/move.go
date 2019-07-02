@@ -13,15 +13,14 @@ import (
 
 // MoveDestination function moves discord users
 func MoveDestination(s *discordgo.Session, workers []*discordgo.Session, m *discordgo.MessageCreate, guild *discordgo.Guild, prefix string, destination string) (string, error) {
-	for _, member := range guild.VoiceStates {
-		if member.UserID == m.Author.ID {
-			if !utils.CheckPermissions(s, member.ChannelID, m.Author.ID, discordgo.PermissionVoiceMoveMembers) {
-				return "", errors.New("no permission origin")
-			}
-			return MoveOriginDestination(s, workers, m, guild, prefix, member.ChannelID, destination)
-		}
+	requesterChannel := utils.GetUserCurrentChannel(s, m.Author.ID, guild)
+	if requesterChannel == "" {
+		return "", errors.New("cant find user")
 	}
-	return "", errors.New("cant find user")
+	if !utils.CheckPermissions(s, requesterChannel, m.Author.ID, discordgo.PermissionVoiceMoveMembers) {
+		return "", errors.New("no permission origin")
+	}
+	return MoveOriginDestination(s, workers, m, guild, prefix, requesterChannel, destination)
 }
 
 // MoveOriginDestination function moves discord users
@@ -35,7 +34,7 @@ func MoveOriginDestination(s *discordgo.Session, workers []*discordgo.Session, m
 Inputs:
 	s *discordgo.Session : the session that called this handler
 	guildID string : the ID of the server (guild) where the request was originated
-	userID string : the ID of the user that is going to be moved
+	origin string : the ID of the Voice Channel the user will be moved from
 	dest string : the ID of the Voice Channel the user will be moved to
 */
 func MoveMembers(servants []*discordgo.Session, guild *discordgo.Guild, origin string, dest string) (string, error) {
@@ -55,6 +54,44 @@ func MoveMembers(servants []*discordgo.Session, guild *discordgo.Guild, origin s
 				}
 			}(guild.ID, member.UserID, dest, servants, index)
 			num++
+		}
+	}
+	wg.Wait()
+	return strconv.Itoa(num), nil
+}
+
+// MoveAllMembers wraps MoveAndRetry with councurrent calls and error reporting.
+/*
+Inputs:
+	s *discordgo.Session : the session that called this handler
+	m *discordgo.MessageCreate : the message event used to check for permissions to move
+	guildID string : the ID of the server (guild) where the request was originated
+	dest string : the ID of the Voice Channel the user will be moved to
+	afk bool : move users from afk channel
+*/
+func MoveAllMembers(servants []*discordgo.Session, m *discordgo.MessageCreate, guild *discordgo.Guild, dest string, afk bool) (string, error) {
+	num := 0
+	var wg sync.WaitGroup
+	for index, member := range guild.VoiceStates {
+		if member.ChannelID != dest {
+
+			if !afk && guild.AfkChannelID == member.ChannelID {
+				continue
+			}
+
+			wg.Add(1)
+			go func(guildID, userID, dest string, servants []*discordgo.Session, index int) {
+				defer wg.Done()
+				if !utils.CheckPermissions(servants[index%len(servants)], member.ChannelID, m.Author.ID, discordgo.PermissionVoiceMoveMembers) {
+					return
+				}
+				err := MoveAndRetry(servants[index%len(servants)], guildID, userID, dest, 3)
+				if err != nil {
+					log.Println("Failed to move user with ID: "+userID, err)
+				}
+			}(guild.ID, member.UserID, dest, servants, index)
+			num++
+
 		}
 	}
 	wg.Wait()

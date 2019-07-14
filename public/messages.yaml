@@ -1,66 +1,91 @@
---- 
+---
 LANG:
-    WelcomeAndLang : |
-        [EN] Hi ! Thank you for adding this bot.
-            Set your language in your guild typing \' %s lang\' and chosing one of the options.
-            Visit the website and add more moving power! http://massmover.github.io
+  WelcomeAndLang: |
+    [EN] Hi ! Thank you for adding this bot.
+        Set the bots language in your guild by typing \' %s lang\' and chosing one of the options.
+        Visit the website and add more moving power! http://massmover.github.io
 
-        [PT/BR] Olá ! Obrigado por adicionar este bot.
-            Configure a linguagem em sua guild digitando \' %s lang\' e escolhendo uma das opçoes.
-            Visite o site e adicione mais níveis de poder! http://massmover.github.io
-    LangSetupMessage: |  
-        1 - [EN] Type \' %s lang\' followed by \'EN\' or \'1\'  and chose the English language 
+    [PT/BR] Olá ! Obrigado por adicionar este bot.
+        Configure a linguagem em sua guild digitando \' %s lang\' e escolhendo uma das opçoes.
+        Visite o site e adicione mais níveis de poder! http://massmover.github.io
+  LangSetupMessage: |
+    1 - [EN] Type \' %s lang\' followed by \'EN\' or \'1\' to select the English language
 
-        2 - [PT/BR] Digite \' %s lang\' seguido de \'PT\', \'BR\' ou \'2\' e escolha a linguagem Portuguesa.
-EN :
-    LangSet : "You chose the English Language [EN]. You can always Change it using the same command."
-    CantFindChannel: "Sorry, I cant find channel %s."
-    CantFindUser: "%s, you need to be connected to a channel for me to find you. Type \' %s move\' to get help."
-    EhhMessage: "%s, you said '%s' ... ehh ? Type \' %s help\' ."
-    GeneralHelp: "Did you call me %s ? Type \' %s help\' to get help."
-    NotInGuild: "Hey %s, you should use this command in a Guild, not in a private chat."
-    HelpMessage: |
-        Use this command to move users from one Voice Channel to another ! 
-        Type \' %s move\' for help
-        Type \' %s lang\' to configure the bot language.
-        Thats all for now.
-    JustMoved: "I just moved %s users for you."
-    MoveHelper: |
-        These are the possible *move* commands\: 
+    2 - [PT/BR] Digite \' %s lang\' seguido de \'PT\', \'BR\' ou \'2\' para selecionar o idioma Portugues.
+EN:
+  LangSet: "The language has been set to English [EN]. You can always Change it using the same command."
+  CantFindChannel: "Sorry, I cant find channel %s."
+  CantFindUser: "%s, you need to be connected to a channel for me to find you. Type \' %s move\' to get help."
+  EhhMessage: "%s, you said '%s' ... ehh ? Type \' %s help\' ."
+  GeneralHelp: "Did you call me %s ? Type \' %s help\' to get help."
+  NotInGuild: "Hey %s, you should use this command in a Guild, not in a private chat."
+  HelpMessage: |
+    Here's a list of available commands:
 
-        %s  move - View this help and the list of available channels
-        %s  move *destination* - Move all users from your current channel to the *destination* channel
-        %s move *origin* *destination* - Move all users from *origin* to the *destination* 
-        PS.\: *origin* and *destination* can be the channels number or the channels name.
-        
-        List of available channels :
-        %s
-    NoPermissionsDestination: "Sorry, but you dont have permissions to move to the Destination channel."
-    NoPermissionsOrigin: "Sorry, but you dont have permissions to move from the Origin channel."
-    SorryBut: "Sorry, but: %s"
-PT :
-    LangSet : "Você escolheu a Língua Portuguesa [PT/BR]. Você sempre proderá mudar usando o mesmo comando."
-    CantFindChannel: "Desculpe, eu não consigo achar o canal %s."
-    CantFindUser: "%s, você precisa estar conectado a um canal de Voz para eu te encontrar. Digite \' %s move\' para obter ajuda."
-    EhhMessage: "%s, você disse '%s' ... ahn? Digite %s help."
-    GeneralHelp: "Me chamou %s ? Digite %s help para receber ajuda."
-    NotInGuild: "Oi %s, você precisa usar estes comandos em uma guilda, não em um chat privado."
-    HelpMessage: |
-        Utilize este bot para mover os usuários de um canal de Voz para outro !
-        Digite  \' %s move\' para ajuda com o comando de mover.
-        Digite \' %s lang\' para configurar a linguagem do bot.
-        É isso por enquanto.
-    JustMoved: "Eu acabei de mover %s usuários para você."
-    MoveHelper: |
-        Esses são os comando possíveis para mover membros\:
+    \' %s move\' move users between voice channels.
+    \' %s summon\' summon all users connected to voice channels into one.
+    \' %s lang\' configure the bot language.
 
-        %s  move - Veja esta mensagem de ajuda e a lista de canais disponíveis.
-        %s  move *destino* - Move todos os usuários do seu canal atual para o canal de *destino*.
-        %s move *origem* *destino* - Move todos os usuários do canal de *origem* para o canal de *destino*.
-        PS.\: *origem* e *destino* podem sem os números ou os nomes dos canais.
-        
-        Lista de canais disponíveis \:
-        %s
-    NoPermissionsDestination: "Desculpe, mas você não tem permissão para mover para o canal de Destino."
-    NoPermissionsOrigin: "Desculpe, mas você não tem permissão para mover do canal de Origem."
-    SorryBut: "Desculpe, mas: %s"
+  JustMoved: "I just moved %s users for you."
+  MoveHelper: |
+    These are the possible *move* commands\:
+
+    %smove - View this help and the list of available channels
+    %smove *destination* - Move all users from your current channel to the *destination* channel
+    %smove *origin* *destination* - Move all users from *origin* to the *destination*
+    PS.\: *origin* and *destination* can be the channels number or the channels name.
+
+    List of available channels \:
+    %s
+  SummonHelp: |
+    The summon feature will move all users from all voice channels to the specified channel.
+
+    %s summon - Display this help message and the list of available channels.
+    %s summon all - Move all users from all channels to your current channel.
+    %s summon all afk - Move all users from all channels to your current channel. Even from the AFK channel.
+    %s summon *destination* - Move all users from all channels to the *destination* channel.
+    %s summon *destination* afk - Move all users from all channels to the *destination* channel. Even from the AFK channel.
+
+    List of available channels \:
+    %s
+  NoPermissionsDestination: "Sorry, but you dont have permissions to move to the Destination channel."
+  NoPermissionsOrigin: "Sorry, but you dont have permissions to move from the Origin channel."
+  SorryBut: "Sorry, but: %s"
+PT:
+  LangSet: "Você escolheu a Língua Portuguesa [PT/BR]. Você sempre proderá mudar usando o mesmo comando."
+  CantFindChannel: "Desculpe, eu não consigo achar o canal %s."
+  CantFindUser: "%s, você precisa estar conectado a um canal de Voz para eu te encontrar. Digite \' %s move\' para obter ajuda."
+  EhhMessage: "%s, você disse '%s' ... ahn? Digite %s help."
+  GeneralHelp: "Me chamou %s ? Digite %s help para receber ajuda."
+  NotInGuild: "Oi %s, você precisa usar estes comandos em uma guilda, não em um chat privado."
+  HelpMessage: |
+    Lista de comandos disponíveis:
+
+    \' %s move\' move usuários de um canal para outro.
+    \' %s summon\' invoca todos os usuários conectados em canais de voz para um canal.
+    \' %s lang\' configura a linguagem do bot.
+  JustMoved: "Eu acabei de mover %s usuários para você."
+  MoveHelper: |
+    Esses são os comando possíveis para mover membros\:
+
+    %s  move - Veja esta mensagem de ajuda e a lista de canais disponíveis.
+    %s  move *destino* - Move todos os usuários do seu canal atual para o canal de *destino*.
+    %s move *origem* *destino* - Move todos os usuários do canal de *origem* para o canal de *destino*.
+    PS.\: *origem* e *destino* podem sem os números ou os nomes dos canais.
+
+    Lista de canais disponíveis \:
+    %s
+  SummonHelp: |
+    O recurso de convocação moverá todos os usuários de todos os canais de voz para o canal especificado.
+
+    %s summon - Exibir esta mensagem de ajuda e a lista de canais disponíveis.
+    %s summon all - Mova todos os usuários de todos os canais de voz para o seu canal.
+    %s summon all afk - Mova todos os usuários de todos os canais de voz para o seu canal. Incluindo usuários do canal AFK.
+    %s summon *destino* - Mova todos os usuários de todos os canais de voz para o canal especificado.
+    %s summon *destino* afk - Mova todos os usuários de todos os canais de voz para o canal especificado. Incluindo usuários do canal AFK.
+    
+    Lista de canais disponíveis \:
+    %s
+  NoPermissionsDestination: "Desculpe, mas você não tem permissão para mover para o canal de Destino."
+  NoPermissionsOrigin: "Desculpe, mas você não tem permissão para mover do canal de Origem."
+  SorryBut: "Desculpe, mas: %s"

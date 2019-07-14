@@ -118,7 +118,20 @@ func (bot *Bot) Start() error {
 
 func (bot *Bot) ready(s *discordgo.Session, event *discordgo.Ready) {
 	// Set the playing status.
-	_ = s.UpdateStatus(0, bot.Prefix+" help")
+	bytesStats, err := db.GetDataTupleBytes(bot.DB, "statistics")
+	if err != nil {
+		log.Println("Failed to get Statistics")
+		s.UpdateStatus(0, bot.Prefix+" help")
+		return
+	}
+	stats := map[string]int{}
+	err = json.Unmarshal(bytesStats, &stats)
+	if err != nil {
+		log.Println("Failed to decode Statistics")
+		s.UpdateStatus(0, bot.Prefix+" help")
+		return
+	}
+	_ = s.UpdateStatus(0, fmt.Sprintf("Moved %d players \n ! %s help", stats["usrs"], bot.Prefix))
 }
 
 // This function will be called (due to AddHandler above) every time a new

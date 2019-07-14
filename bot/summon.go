@@ -47,9 +47,13 @@ func (bot *Bot) Summon(m *discordgo.MessageCreate, params []string) (string, err
 		if params[1] == "all" {
 
 			num, err := mover.MoveAllMembers(<-workerschann, m, guild, destination, afk)
-			if err != nil {
+			if err != nil && num != "0" {
+				_, _ = bot.CommanderSession.ChannelMessageSend(m.ChannelID, bot.Messages[utils.GetGuildLocale(bot.DB, m)]["CantMoveSomeUsers"])
+			} else if err != nil {
 				if err.Error() == "no permission origin" {
 					_, _ = bot.CommanderSession.ChannelMessageSend(m.ChannelID, bot.Messages[utils.GetGuildLocale(bot.DB, m)]["NoPermissionsOrigin"])
+				} else if err.Error() == "bot permission" {
+					_, _ = bot.CommanderSession.ChannelMessageSend(m.ChannelID, bot.Messages[utils.GetGuildLocale(bot.DB, m)]["BotNoPermission"])
 				} else if err.Error() == "cant find user" {
 					_, _ = bot.CommanderSession.ChannelMessageSend(m.ChannelID, fmt.Sprintf(bot.Messages[utils.GetGuildLocale(bot.DB, m)]["CantFindUser"], m.Author.Mention(), bot.Prefix))
 				} else {
@@ -67,9 +71,13 @@ func (bot *Bot) Summon(m *discordgo.MessageCreate, params []string) (string, err
 		}
 
 		num, err := mover.MoveAllMembers(<-workerschann, m, guild, destination, afk)
-		if err != nil {
+		if err != nil && num != "0" {
+			_, _ = bot.CommanderSession.ChannelMessageSend(m.ChannelID, bot.Messages[utils.GetGuildLocale(bot.DB, m)]["CantMoveSomeUsers"])
+		} else if err != nil {
 			if err.Error() == "no permission origin" {
 				_, _ = bot.CommanderSession.ChannelMessageSend(m.ChannelID, bot.Messages[utils.GetGuildLocale(bot.DB, m)]["NoPermissionsOrigin"])
+			} else if err.Error() == "bot permission" {
+				_, _ = bot.CommanderSession.ChannelMessageSend(m.ChannelID, bot.Messages[utils.GetGuildLocale(bot.DB, m)]["BotNoPermission"])
 			} else if err.Error() == "cant find user" {
 				_, _ = bot.CommanderSession.ChannelMessageSend(m.ChannelID, fmt.Sprintf(bot.Messages[utils.GetGuildLocale(bot.DB, m)]["CantFindUser"], m.Author.Mention(), bot.Prefix))
 			} else {

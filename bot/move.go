@@ -39,9 +39,13 @@ func (bot *Bot) Move(m *discordgo.MessageCreate, params []string) (string, error
 		}
 
 		num, err := mover.MoveDestination(bot.CommanderSession, <-workerschann, m, guild, bot.Prefix, destination)
-		if err != nil {
+		if err != nil && num != "0" {
+			_, _ = bot.CommanderSession.ChannelMessageSend(m.ChannelID, bot.Messages[utils.GetGuildLocale(bot.DB, m)]["CantMoveSomeUsers"])
+		} else if err != nil {
 			if err.Error() == "no permission origin" {
 				_, _ = bot.CommanderSession.ChannelMessageSend(m.ChannelID, bot.Messages[utils.GetGuildLocale(bot.DB, m)]["NoPermissionsOrigin"])
+			} else if err.Error() == "bot permission" {
+				_, _ = bot.CommanderSession.ChannelMessageSend(m.ChannelID, bot.Messages[utils.GetGuildLocale(bot.DB, m)]["BotNoPermission"])
 			} else if err.Error() == "cant find user" {
 				_, _ = bot.CommanderSession.ChannelMessageSend(m.ChannelID, fmt.Sprintf(bot.Messages[utils.GetGuildLocale(bot.DB, m)]["CantFindUser"], m.Author.Mention(), bot.Prefix))
 			} else {
@@ -77,9 +81,18 @@ func (bot *Bot) Move(m *discordgo.MessageCreate, params []string) (string, error
 		}
 
 		num, err := mover.MoveOriginDestination(bot.CommanderSession, <-workerschann, m, guild, bot.Prefix, origin, destination)
-		if err != nil {
-			_, _ = bot.CommanderSession.ChannelMessageSend(m.ChannelID, fmt.Sprintf(bot.Messages[utils.GetGuildLocale(bot.DB, m)]["JustMoved"], err.Error()))
-			log.Println(err.Error())
+		if err != nil && num != "0" {
+			_, _ = bot.CommanderSession.ChannelMessageSend(m.ChannelID, bot.Messages[utils.GetGuildLocale(bot.DB, m)]["CantMoveSomeUsers"])
+		} else if err != nil {
+			if err.Error() == "no permission origin" {
+				_, _ = bot.CommanderSession.ChannelMessageSend(m.ChannelID, bot.Messages[utils.GetGuildLocale(bot.DB, m)]["NoPermissionsOrigin"])
+			} else if err.Error() == "bot permission" {
+				_, _ = bot.CommanderSession.ChannelMessageSend(m.ChannelID, bot.Messages[utils.GetGuildLocale(bot.DB, m)]["BotNoPermission"])
+			} else if err.Error() == "cant find user" {
+				_, _ = bot.CommanderSession.ChannelMessageSend(m.ChannelID, fmt.Sprintf(bot.Messages[utils.GetGuildLocale(bot.DB, m)]["CantFindUser"], m.Author.Mention(), bot.Prefix))
+			} else {
+				_, _ = bot.CommanderSession.ChannelMessageSend(m.ChannelID, fmt.Sprintf(bot.Messages[utils.GetGuildLocale(bot.DB, m)]["SorryBut"], err.Error()))
+			}
 			return "", err
 		}
 

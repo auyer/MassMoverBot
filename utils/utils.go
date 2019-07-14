@@ -164,3 +164,25 @@ func AskMember(s *discordgo.Session, member string, message string) error {
 	_, err = s.ChannelMessageSend(c.ID, message) // event.Guild.OwnerID
 	return err
 }
+
+// HaveIAskedMember function is used to send a private message to a guild member
+/*
+This function will return false in case of error and if the user recieved any message from a bot.
+It checks the 10 last messages in the chat.
+*/
+func HaveIAskedMember(s *discordgo.Session, member string) bool {
+	c, err := s.UserChannelCreate(member)
+	if err != nil {
+		return false
+	}
+	messages, err := s.ChannelMessages(c.ID, 10, "", "", "") // reading 10 messages to overcome possible user-sent messages
+	if err != nil {
+		return false
+	}
+	for _, message := range messages {
+		if message.Author.Bot {
+			return true
+		}
+	}
+	return false
+}

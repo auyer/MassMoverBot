@@ -129,15 +129,17 @@ func (bot *Bot) guildCreate(s *discordgo.Session, event *discordgo.GuildCreate) 
 	}
 	log.Println("Joined " + event.Guild.Name + " (" + event.Guild.ID + ")" + " in " + event.Guild.Region)
 
-	val, err := db.GetDataTuple(bot.DB, "M:"+event.Guild.ID)
+	val, err := db.GetDataTuple(bot.DB, "M:"+event.Guild.OwnerID)
 	if err != nil {
 		if err == badger.ErrKeyNotFound || val == "" {
-			err = utils.AskMember(s, event.Guild.OwnerID, fmt.Sprintf(bot.Messages["LANG"]["WelcomeAndLang"], bot.Prefix, bot.Prefix))
-			if err != nil {
-				log.Println("Failed to send message to owner.")
-				return
+			if !utils.HaveIAskedMember(s, event.Guild.OwnerID) {
+				err = utils.AskMember(s, event.Guild.OwnerID, fmt.Sprintf(bot.Messages["LANG"]["WelcomeAndLang"], bot.Prefix, bot.Prefix))
+				if err != nil {
+					log.Println("Failed to send message to owner.")
+					return
+				}
 			}
-			_ = db.UpdateDataTuple(bot.DB, "M:"+event.Guild.ID, "1")
+			_ = db.UpdateDataTuple(bot.DB, "M:"+event.Guild.OwnerID, "1")
 		}
 	}
 }

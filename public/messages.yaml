@@ -22,11 +22,10 @@ EN:
   HelpMessage: |
     Here's a list of available commands:
 
-    \' %smove\' move users between voice channels
-    \' %smove\' summon all users connected to voice channels into one
-    \' %slang\' to configure the bot language.
+    \' %s move\' move users between voice channels.
+    \' %s summon\' summon all users connected to voice channels into one.
+    \' %s lang\' configure the bot language.
 
-    You can get more information by using the commands without parameters.
   JustMoved: "I just moved %s users for you."
   MoveHelper: |
     These are the possible *move* commands\:
@@ -60,10 +59,11 @@ PT:
   GeneralHelp: "Me chamou %s ? Digite %s help para receber ajuda."
   NotInGuild: "Oi %s, você precisa usar estes comandos em uma guilda, não em um chat privado."
   HelpMessage: |
-    Utilize este bot para mover os usuários de um canal de Voz para outro !
-    Digite  \' %s move\' para ajuda com o comando de mover.
-    Digite \' %s lang\' para configurar a linguagem do bot.
-    É isso por enquanto.
+    Lista de comandos disponíveis:
+
+    \' %s move\' move usuários de um canal para outro.
+    \' %s summon\' invoca todos os usuários conectados em canais de voz para um canal.
+    \' %s lang\' configura a linguagem do bot.
   JustMoved: "Eu acabei de mover %s usuários para você."
   MoveHelper: |
     Esses são os comando possíveis para mover membros\:

@@ -200,12 +200,20 @@ func (bot *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate)
 			bot.bumpStatistics(moved)
 
 		case "summon":
-			_, _ = bot.Summon(m, params)
+			moved, err := bot.Summon(m, params)
+			if err != nil {
 
-		case "help":
-			_, _ = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(bot.Messages[lang]["HelpMessage"], bot.Prefix, bot.Prefix, bot.Prefix))
+				return
+			}
+			bot.bumpStatistics(moved)
 
 		case "lang":
+			_, err := bot.CommanderSession.Guild(m.GuildID) // retrieving the server (guild) the message was originated from
+			if err != nil {
+				log.Println(err)
+				_, _ = bot.CommanderSession.ChannelMessageSend(m.ChannelID, fmt.Sprintf(bot.Messages[utils.GetGuildLocale(bot.DB, m)]["NotInGuild"], m.Author.Mention()))
+				return
+			}
 			if numParams == 2 {
 				chosenLang := utils.SelectLang(params[1])
 				_ = db.UpdateDataTuple(bot.DB, m.GuildID, chosenLang)
@@ -216,7 +224,7 @@ func (bot *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate)
 			}
 
 		default:
-			_, _ = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(bot.Messages[lang]["EhhMessage"], m.Author.Mention(), m.Content, bot.Prefix))
+			_, _ = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(bot.Messages[lang]["HelpMessage"], bot.Prefix, bot.Prefix, bot.Prefix))
 		}
 	}
 }

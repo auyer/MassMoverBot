@@ -16,7 +16,12 @@ func (bot *Bot) Summon(m *discordgo.MessageCreate, params []string) (string, err
 	workerschann := make(chan []*discordgo.Session, 1)
 	go utils.DetectServants(m.GuildID, append(bot.PowerupSessions, bot.CommanderSession), workerschann)
 
-	guild, _ := bot.CommanderSession.Guild(m.GuildID)
+	guild, err := bot.CommanderSession.Guild(m.GuildID) // retrieving the server (guild) the message was originated from
+	if err != nil {
+		log.Println(err)
+		_, _ = bot.CommanderSession.ChannelMessageSend(m.ChannelID, fmt.Sprintf(bot.Messages[utils.GetGuildLocale(bot.DB, m)]["NotInGuild"], m.Author.Mention()))
+		return "", errors.New("notinguild")
+	}
 
 	destination := utils.GetUserCurrentChannel(bot.CommanderSession, m.Author.ID, guild)
 

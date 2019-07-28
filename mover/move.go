@@ -2,9 +2,7 @@ package mover
 
 import (
 	"errors"
-	"fmt"
 	"log"
-	"sort"
 	"strconv"
 	"sync"
 	"time"
@@ -15,21 +13,19 @@ import (
 
 // MoveDestination function moves discord users
 func MoveDestination(s *discordgo.Session, workers []*discordgo.Session, m *discordgo.MessageCreate, guild *discordgo.Guild, prefix string, destination string) (string, error) {
-	for _, member := range guild.VoiceStates {
-		if member.UserID == m.Author.ID {
-			if !utils.CheckPermissions(s, member.ChannelID, m.Author.ID, discordgo.PermissionVoiceMoveMembers) {
-				return "", errors.New("no permission origin")
-			}
-			return MoveOriginDestination(s, workers, m, guild, prefix, member.ChannelID, destination)
-		}
+	requesterChannel := utils.GetUserCurrentChannel(s, m.Author.ID, guild)
+	if requesterChannel == "" {
+		return "", errors.New("cant find user")
 	}
-	return "", errors.New("cant find user")
+	if !utils.CheckPermissions(s, requesterChannel, m.Author.ID, discordgo.PermissionVoiceMoveMembers) {
+		return "", errors.New("no permission origin")
+	}
+	return MoveOriginDestination(s, workers, m, guild, prefix, requesterChannel, destination)
 }
 
 // MoveOriginDestination function moves discord users
 func MoveOriginDestination(s *discordgo.Session, workers []*discordgo.Session, m *discordgo.MessageCreate, guild *discordgo.Guild, prefix string, origin string, destination string) (string, error) {
-	num, err := MoveMembers(workers, guild, origin, destination)
-	return num, err
+	return MoveMembers(workers, guild, origin, destination)
 }
 
 // MoveMembers wraps MoveAndRetry with councurrent calls and error reporting.
@@ -37,7 +33,7 @@ func MoveOriginDestination(s *discordgo.Session, workers []*discordgo.Session, m
 Inputs:
 	s *discordgo.Session : the session that called this handler
 	guildID string : the ID of the server (guild) where the request was originated
-	userID string : the ID of the user that is going to be moved
+	origin string : the ID of the Voice Channel the user will be moved from
 	dest string : the ID of the Voice Channel the user will be moved to
 */
 func MoveMembers(servants []*discordgo.Session, guild *discordgo.Guild, origin string, dest string) (string, error) {
@@ -63,6 +59,44 @@ func MoveMembers(servants []*discordgo.Session, guild *discordgo.Guild, origin s
 	return strconv.Itoa(num), nil
 }
 
+// MoveAllMembers wraps MoveAndRetry with councurrent calls and error reporting.
+/*
+Inputs:
+	s *discordgo.Session : the session that called this handler
+	m *discordgo.MessageCreate : the message event used to check for permissions to move
+	guildID string : the ID of the server (guild) where the request was originated
+	dest string : the ID of the Voice Channel the user will be moved to
+	afk bool : move users from afk channel
+*/
+func MoveAllMembers(servants []*discordgo.Session, m *discordgo.MessageCreate, guild *discordgo.Guild, dest string, afk bool) (string, error) {
+	num := 0
+	var wg sync.WaitGroup
+	for index, member := range guild.VoiceStates {
+		if member.ChannelID != dest {
+
+			if !afk && guild.AfkChannelID == member.ChannelID {
+				continue
+			}
+
+			wg.Add(1)
+			go func(guildID, userID, dest string, servants []*discordgo.Session, index int) {
+				defer wg.Done()
+				if !utils.CheckPermissions(servants[index%len(servants)], member.ChannelID, m.Author.ID, discordgo.PermissionVoiceMoveMembers) {
+					return
+				}
+				err := MoveAndRetry(servants[index%len(servants)], guildID, userID, dest, 3)
+				if err != nil {
+					log.Println("Failed to move user with ID: "+userID, err)
+				}
+			}(guild.ID, member.UserID, dest, servants, index)
+			num++
+
+		}
+	}
+	wg.Wait()
+	return strconv.Itoa(num), nil
+}
+
 // MoveAndRetry is a wrapper on top of discordgo.Session.GuildMemberMove with a retry function
 /*
 Inputs:
@@ -82,27 +116,4 @@ func MoveAndRetry(s *discordgo.Session, guildID, userID, dest string, retry int)
 		MoveAndRetry(s, guildID, userID, dest, retry-1)
 	}
 	return nil
-}
-
-// MoveHelper prints the help text for this command
-/*
-Inputs:
-	chann []*discordgo.Channel : list of all channels in the server (used to list the numbers)
-	prefix string: prefix used to call the bot (used to print in the message)
-
-Outputs: message string
-*/
-func MoveHelper(channs []*discordgo.Channel, message, prefix string) string {
-	sort.Slice(channs[:], func(i, j int) bool {
-		return channs[i].Position < channs[j].Position
-	})
-	i := 0
-	channelString := ""
-	for _, chann := range channs {
-		if chann.Type == 2 {
-			i++
-			channelString = channelString + strconv.Itoa(i) + " ) " + chann.Name + "\n"
-		}
-	}
-	return fmt.Sprintf(message, prefix, prefix, prefix, channelString)
 }

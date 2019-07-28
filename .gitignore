@@ -1,0 +1,15 @@
+### Go template
+# Binaries for programs and plugins
+*.exe
+
+# Vendored deps
+vendor
+
+# Log FIles
+*.log
+
+# IntelliJ project files
+.idea
+
+# VSCode project files
+.vscode

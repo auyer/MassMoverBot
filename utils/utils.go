@@ -11,6 +11,7 @@ import (
 var langs = map[int]string{
 	1: "EN",
 	2: "PT",
+	3: "FR",
 }
 
 // GetChannel retrieves the channel ID by the name or position ID
@@ -139,6 +140,8 @@ func SelectLang(choice string) string {
 		return "PT"
 	case "BR":
 		return "PT"
+	case "FR":
+		return "FR"
 	default:
 		return "EN"
 	}

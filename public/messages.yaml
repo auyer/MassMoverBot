@@ -16,6 +16,8 @@ LANG:
     1 - [EN] Type \' %s lang\' followed by \'EN\' or \'1\' to select the English language
 
     2 - [PT/BR] Digite \' %s lang\' seguido de \'PT\', \'BR\' ou \'2\' para selecionar o idioma Portugues.
+
+    4 - Tapez \ '% s lang \' suivi de \ 'FR \' ou \ '4 \' pour sélectionner la langue française
 EN:
   LangSet: "The language has been set to English [EN]. You can always Change it using the same command."
   CantFindChannel: "Sorry, I cant find channel %s."
@@ -100,7 +102,7 @@ FR :
   HelpMessage: |
       Utilise cette commande pour déplacer des utilisateurs d'un canal vocal à un autre !
       Tape \' %s move\' pour plus de détails.
-      \' %s summon\' déplace tous les utilisateurs connectés en vocal dans un même canal.
+      Tape \' %s summon\' déplace tous les utilisateurs connectés en vocal dans un même canal.
       Tape \' %s lang\' pour choisir le langage du bot.
       C'est tout... Pour l'instant.
   JustMoved: "J'ai déplacé %s utilisateurs pour toi."

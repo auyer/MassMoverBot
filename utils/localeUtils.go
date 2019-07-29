@@ -13,6 +13,7 @@ var langs = map[int]string{
 	1: "EN",
 	2: "PT",
 	3: "ES",
+	4: "FR",
 }
 
 // SelectLang selects a language code based on number or string code
@@ -39,6 +40,8 @@ func SelectLang(choice string) string {
 		return "PT"
 	case "ES":
 		return "ES"
+	case "FR":
+		return "FR"
 	default:
 		return "EN"
 	}

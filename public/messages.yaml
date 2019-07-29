@@ -100,7 +100,7 @@ FR :
   HelpMessage: |
       Utilise cette commande pour déplacer des utilisateurs d'un canal vocal à un autre !
       Tape \' %s move\' pour plus de détails.
-      \' %s summon\' summon all users connected to voice channels into one.
+      \' %s summon\' déplace tous les utilisateurs connectés en vocal dans un même canal.
       Tape \' %s lang\' pour choisir le langage du bot.
       C'est tout... Pour l'instant.
   JustMoved: "J'ai déplacé %s utilisateurs pour toi."
@@ -115,15 +115,15 @@ FR :
       Liste des canaux disponibles\:
       %s
   SummonHelp: |
-    The summon feature will move all users from all voice channels to the specified channel.
+    La fonctionnalité "summon" consiste à déplacer tous les utilisateurs de tous les canaux vocaux dans un même canal spécifié.
 
-    %s summon - Display this help message and the list of available channels.
-    %s summon all - Move all users from all channels to your current channel.
-    %s summon all afk - Move all users from all channels to your current channel. Even from the AFK channel.
-    %s summon *destination* - Move all users from all channels to the *destination* channel.
-    %s summon *destination* afk - Move all users from all channels to the *destination* channel. Even from the AFK channel.
+    %s summon - Voir ce message d'aide et lister les canaux vocaux disponibles
+    %s summon all - Déplacer tous les utilisateurs connectés en vocal dans ton canal actuel.
+    %s summon all afk - Déplacer tous les utilisateurs connectés en vocal, même les AFK, dans ton canal actuel.
+    %s summon *destination* - Déplacer tous les utilisateurs de tous les canaux dans le canal de *destination*
+    %s summon *destination* afk - Déplacer tous les utilisateurs de tous les canaux, même AFK, dans le canal de *destination*
 
-    List of available channels \:
+    Liste des canaux disponibles \:
     %s
   NoPermissionsDestination: "Désolé, mais vous n'avez pas la permission de déplacer des utilisateurs vers la destination choisie"
   NoPermissionsOrigin: "Désolé, mais vous n'avez pas la permission de déplacer des utilisateurs depuis l'origine choisie"

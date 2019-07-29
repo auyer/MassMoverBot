@@ -146,7 +146,7 @@ func (bot *Bot) guildCreate(s *discordgo.Session, event *discordgo.GuildCreate) 
 	if err != nil {
 		if err == badger.ErrKeyNotFound || val == "" {
 			if !utils.HaveIAskedMember(s, event.Guild.OwnerID) {
-				err = utils.AskMember(s, event.Guild.OwnerID, fmt.Sprintf(bot.Messages["LANG"]["WelcomeAndLang"], bot.Prefix, bot.Prefix))
+				err = utils.AskMember(s, event.Guild.OwnerID, fmt.Sprintf(bot.Messages["LANG"]["WelcomeAndLang"], bot.Prefix, bot.Prefix, bot.Prefix))
 				if err != nil {
 					log.Println("Failed to send message to owner.")
 					return
@@ -220,7 +220,7 @@ func (bot *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate)
 				lang = chosenLang
 				_, _ = s.ChannelMessageSend(m.ChannelID, bot.Messages[lang]["LangSet"])
 			} else {
-				_, _ = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(bot.Messages["LANG"]["LangSetupMessage"], bot.Prefix, bot.Prefix))
+				_, _ = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(bot.Messages["LANG"]["LangSetupMessage"], bot.Prefix, bot.Prefix, bot.Prefix))
 			}
 
 		default:

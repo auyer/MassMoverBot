@@ -28,6 +28,8 @@ EN:
   LangSet: "The language has been set to English [EN]. You can always Change it using the same command."
   CantFindChannel: "Sorry, I cant find channel %s."
   CantFindUser: "%s, you need to be connected to a channel for me to find you. Type \' %s move\' to get help."
+  CantMoveSomeUsers: "Some users were not moved due to errors. Please check the permissions of the Mover Bots."
+  BotNoPermission: "The bot was unable to move users. Please check the permissions of the Mover Bots."
   GeneralHelp: "Did you call me %s ? Type \' %s help\' to get help."
   NotInGuild: "Hey %s, you should use this command in a Guild, not in a private chat."
   HelpMessage: |
@@ -66,6 +68,8 @@ PT:
   LangSet: "Você escolheu a Língua Portuguesa [PT/BR]. Você sempre proderá mudar usando o mesmo comando."
   CantFindChannel: "Desculpe, eu não consigo achar o canal %s."
   CantFindUser: "%s, você precisa estar conectado a um canal de Voz para eu te encontrar. Digite \' %s move\' para obter ajuda."
+  CantMoveSomeUsers: "Alguns usuários não foram movidos devido a erros. Favor verificar as permissões dos mover bots."
+  BotNoPermission: "O bot não conseguiu mover os usuários. Favor verificar as permissões dos mover bots."
   GeneralHelp: "Me chamou %s ? Digite %s help para receber ajuda."
   NotInGuild: "Oi %s, você precisa usar estes comandos em uma guilda, não em um chat privado."
   HelpMessage: |
@@ -103,6 +107,8 @@ ES:
   LangSet: "El idioma ha sido cambiado a Español [ES]. Esto puede cambiarse en cualquier momento usando el mismo comando."
   CantFindChannel: "Disculpa, no se ha podido encontrar el canal %s."
   CantFindUser: "%s, Necesitas estar conectado a un canal de voz para que pueda encontrarte. Escriba \' %s move\' para obtener ayuda."
+  CantMoveSomeUsers: "Algunos usuarios no se movieron debido a errores. Verifique los permisos de los Mover Bots."
+  BotNoPermission: "El bot no pudo mover a los usuarios. Verifique los permisos de los Mover Bots."
   GeneralHelp: "Me buscabas %s ? Type \' %s help\' para obtener ayuda."
   NotInGuild: "Hey %s, este comando es para usarse en una guild, no en un chat privado."
   HelpMessage: |
@@ -141,6 +147,8 @@ FR :
   LangSet : "Tu as choisis le français [FR]. Tu peux toujours changer de langage en utilisant la même commande."
   CantFindChannel: "Désolé, je ne peux pas trouver le canal %s."
   CantFindUser: "%s, tu dois être connecté(e) à un canal pour que je puisse te trouver. Utilise \' %s move\' pour obtenir de l'aide."
+  CantMoveSomeUsers: "Certains utilisateurs n'ont pas été déplacés à cause d'erreurs. S'il vous plaît vérifier les autorisations des Mover Bots."
+  BotNoPermission: "Le bot n'a pas pu déplacer les utilisateurs. S'il vous plaît vérifier les autorisations des Mover Bots."
   GeneralHelp: "M'as-tu appelé, %s ? Utilise \' %s help\' pour obtenir de l'aide."
   NotInGuild: "Hey %s, tu devrais utiliser cette commande dans une guilde uniquement, pas dans un chat privé."
   HelpMessage: |

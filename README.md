@@ -7,7 +7,7 @@
 The MassMover bot is a Multi-Token Discord Bot.
 This can be used to split intensive operations, or API limited opperations like the "User Voice Channel Move" opperations.
 
-It is capable of using N "PowerUp" Bot connections to perform fast mass "User Move" operations, and the request will be executed by the ammount of bots connected to the server.
+It is capable of using N "PowerUp" Bot connections to perform fast mass "User Move" operations, and the request will be executed by the amount of bots connected to the server.
 
 ![GIF: moving 28 user with 2 "powerups"](https://raw.githubusercontent.com/auyer/MassMoverHugoPage/master/static/img/half.gif)
 
@@ -24,19 +24,22 @@ The possible commands are:
  - `> move` -> prints move command help and all channels visible to the bot
  - `> move destination` -> moves users from your current channel to the destination channel.
 
-    Exemple : `> move chat_y` , or `> move 2`
+    Example : `> move chat_y` , or `> move 2`
 
  - `> move origin destination` -> moves users from the origin channel to the destination channel
 
-    Exemple : `> move chat_x chat_y` , or `> move 1 2`
+    Example : `> move chat_x chat_y` , or `> move 1 2`
  - `> lang` -> prints language configuration help message
  - `> lang option` -> changes the bot language to a specific language.
 
-    Exemple: `> lang EN` or `> lang 1` will set the English language.
+    Example: `> lang EN` or `> lang 1` will set the English language.
      
      The current options are: 
      - **1** or **EN** for English
      - **2** or **PT** or **BR** for Portuguese
+     - **3** or **ES** for Spanish
+     - **4** or **FR** for French
+     
 
 
 ## Configuration

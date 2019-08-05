@@ -11,6 +11,16 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
+// Move function deals with the possible parameters for a move command
+/*
+Inputs:
+	m *discordgo.MessageCreate : the message received by the bot
+	 params []string : all the parameters used in the message
+
+Outputs:
+	string : number of users moved by this command
+ 	error : a error if something wrong happened
+*/
 func (bot *Bot) Move(m *discordgo.MessageCreate, params []string) (string, error) {
 
 	workerschann := make(chan []*discordgo.Session, 1)

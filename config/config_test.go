@@ -7,10 +7,10 @@ import (
 var (
 	testConfigPath = "../config.model.json"
 	testConfig     = ConfigurationParameters{
-		CommanderToken: "commanderToken",
-		PowerupTokens:  []string{"servantToken1", "servantToken2"},
-		BotPrefix:      "-c",
-		DatabasePath:   "./databases/",
+		MoverBotToken: "MoverBotToken",
+		PowerupTokens: []string{"servantToken1", "servantToken2"},
+		BotPrefix:     "-c",
+		DatabasePath:  "./databases/",
 	}
 )
 
@@ -22,10 +22,10 @@ func TestConfRead(t *testing.T) {
 	}
 	for i := range conf.PowerupTokens {
 		if conf.PowerupTokens[i] != testConfig.PowerupTokens[i] {
-			t.Errorf("Servant Tokens do not match")
+			t.Errorf("Powerup Tokens do not match")
 		}
 	}
-	if conf.BotPrefix == testConfig.BotPrefix && conf.CommanderToken == testConfig.CommanderToken && conf.DatabasePath == conf.DatabasePath {
+	if conf.BotPrefix == testConfig.BotPrefix && conf.MoverBotToken == testConfig.MoverBotToken && conf.DatabasePath == conf.DatabasePath {
 		return
 	}
 	t.Errorf("String parameters not matching")

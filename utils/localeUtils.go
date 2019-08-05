@@ -12,6 +12,8 @@ import (
 var langs = map[int]string{
 	1: "EN",
 	2: "PT",
+	3: "ES",
+	4: "FR",
 }
 
 // SelectLang selects a language code based on number or string code
@@ -20,7 +22,8 @@ Input:
 	choice string
 Output:
 	language string
-*/func SelectLang(choice string) string {
+*/
+func SelectLang(choice string) string {
 	if intparam, err := strconv.Atoi(choice); err == nil {
 		choice := langs[intparam]
 		if choice != "" {
@@ -35,6 +38,10 @@ Output:
 		return "PT"
 	case "BR":
 		return "PT"
+	case "ES":
+		return "ES"
+	case "FR":
+		return "FR"
 	default:
 		return "EN"
 	}

@@ -108,7 +108,7 @@ func CheckPermissions(s *discordgo.Session, channelID string, userID string, per
 	return true
 }
 
-// DetectServants will retrieve all bots logged in to the discord server with the provided ID.
+// DetectPowerups will retrieve all bots logged in to the discord server with the provided ID.
 /*
 This function in ment to be used cuncurently.
 
@@ -119,7 +119,7 @@ Inputs:
 
 Output is sent in the rchan channel
 */
-func DetectServants(guildID string, servants []*discordgo.Session, rchan chan []*discordgo.Session) {
+func DetectPowerups(guildID string, servants []*discordgo.Session, rchan chan []*discordgo.Session) {
 	var workers []*discordgo.Session
 	for _, powerup := range servants {
 		_, err := powerup.State.Guild(guildID)

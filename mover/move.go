@@ -42,21 +42,32 @@ func MoveMembers(servants []*discordgo.Session, guild *discordgo.Guild, origin s
 	}
 	num := 0
 	var wg sync.WaitGroup
+	errchan := make(chan error, 10)
 	for index, member := range guild.VoiceStates {
 		if member.ChannelID == origin {
 			wg.Add(1)
-			go func(guildID, userID, dest string, servants []*discordgo.Session, index int) {
+			go func(guildID, userID, dest string, servants []*discordgo.Session, index int, errchan chan error) {
 				defer wg.Done()
 				err := MoveAndRetry(servants[index%len(servants)], guildID, userID, dest, 3)
 				if err != nil {
 					log.Println("Failed to move user with ID: "+userID, err)
+					errchan <- errors.New("bot permission")
 				}
-			}(guild.ID, member.UserID, dest, servants, index)
+			}(guild.ID, member.UserID, dest, servants, index, errchan)
 			num++
 		}
 	}
-	wg.Wait()
-	return strconv.Itoa(num), nil
+	go func() {
+		wg.Wait()
+		close(errchan)
+	}()
+	var err error
+	for errFromChan := range errchan {
+		num--
+		err = errFromChan
+	}
+
+	return strconv.Itoa(num), err
 }
 
 // MoveAllMembers wraps MoveAndRetry with councurrent calls and error reporting.
@@ -71,6 +82,7 @@ Inputs:
 func MoveAllMembers(servants []*discordgo.Session, m *discordgo.MessageCreate, guild *discordgo.Guild, dest string, afk bool) (string, error) {
 	num := 0
 	var wg sync.WaitGroup
+	errchan := make(chan error, 10)
 	for index, member := range guild.VoiceStates {
 		if member.ChannelID != dest {
 
@@ -79,7 +91,7 @@ func MoveAllMembers(servants []*discordgo.Session, m *discordgo.MessageCreate, g
 			}
 
 			wg.Add(1)
-			go func(guildID, userID, dest string, servants []*discordgo.Session, index int) {
+			go func(guildID, userID, dest string, servants []*discordgo.Session, index int, errchan chan error) {
 				defer wg.Done()
 				if !utils.CheckPermissions(servants[index%len(servants)], member.ChannelID, m.Author.ID, discordgo.PermissionVoiceMoveMembers) {
 					return
@@ -87,14 +99,25 @@ func MoveAllMembers(servants []*discordgo.Session, m *discordgo.MessageCreate, g
 				err := MoveAndRetry(servants[index%len(servants)], guildID, userID, dest, 3)
 				if err != nil {
 					log.Println("Failed to move user with ID: "+userID, err)
+					errchan <- errors.New("bot permission")
 				}
-			}(guild.ID, member.UserID, dest, servants, index)
+			}(guild.ID, member.UserID, dest, servants, index, errchan)
 			num++
 
 		}
 	}
-	wg.Wait()
-	return strconv.Itoa(num), nil
+
+	go func() {
+		wg.Wait()
+		close(errchan)
+	}()
+	var err error
+	for errFromChan := range errchan {
+		num--
+		err = errFromChan
+	}
+
+	return strconv.Itoa(num), err
 }
 
 // MoveAndRetry is a wrapper on top of discordgo.Session.GuildMemberMove with a retry function

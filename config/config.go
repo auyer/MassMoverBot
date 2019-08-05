@@ -16,16 +16,12 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// var (
-// 	DatabasePath string
-// )
-
 // ConfigurationParameters stores the necessary info for a Multi Token bot
 type ConfigurationParameters struct {
-	CommanderToken string   `json:"CommanderToken"`
-	PowerupTokens  []string `json:"PowerupTokens"`
-	BotPrefix      string   `json:"BotPrefix"`
-	DatabasePath   string   `json:"DatabasePath"`
+	MoverBotToken string   `json:"MoverBotToken"`
+	PowerupTokens []string `json:"PowerupTokens"`
+	BotPrefix     string   `json:"BotPrefix"`
+	DatabasePath  string   `json:"DatabasePath"`
 }
 
 const (

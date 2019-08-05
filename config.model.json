@@ -1,5 +1,5 @@
 {
-    "CommanderToken" : "commanderToken",
+    "MoverBotToken" : "MoverBotToken",
     "PowerupTokens" : ["servantToken1", "servantToken2"],
     "BotPrefix" : "-c",
     "DatabasePath" : "./databases/"

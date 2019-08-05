@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/auyer/massmoverbot/db"
-	"github.com/bwmarrin/discordgo"
 	"github.com/dgraph-io/badger"
 )
 
@@ -47,8 +46,16 @@ func SelectLang(choice string) string {
 	}
 }
 
-func GetGuildLocale(conn *badger.DB, m *discordgo.MessageCreate) string {
-	lang, err := db.GetDataTuple(conn, m.GuildID)
+// GetGuildLocale function will return the language for a guild, returning EN by default.
+/*
+Input:
+	conn *badger.DB : a connection with the badger db
+	GuildID string : the ID of the guild
+Output:
+	language string
+*/
+func GetGuildLocale(conn *badger.DB, GuildID string) string {
+	lang, err := db.GetDataTuple(conn, GuildID)
 	if err != nil {
 		lang = "EN"
 	}

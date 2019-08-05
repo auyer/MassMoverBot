@@ -179,7 +179,7 @@ func (bot *Bot) guildDelete(s *discordgo.Session, event *discordgo.GuildDelete) 
 func (bot *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Is this message from a human && Does the message have the bot prefix?
 	if !m.Author.Bot && strings.HasPrefix(m.Content, bot.Prefix) {
-		lang := utils.GetGuildLocale(bot.DB, m)
+		lang := utils.GetGuildLocale(bot.DB, m.GuildID)
 
 		// Split params using regex
 		params := commandRegEx.FindAllString(m.Content[1:], -1)
@@ -217,7 +217,7 @@ func (bot *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate)
 			_, err := bot.MoverSession.Guild(m.GuildID) // retrieving the server (guild) the message was originated from
 			if err != nil {
 				log.Println(err)
-				_, _ = bot.MoverSession.ChannelMessageSend(m.ChannelID, fmt.Sprintf(bot.Messages[utils.GetGuildLocale(bot.DB, m)]["NotInGuild"], m.Author.Mention()))
+				_, _ = bot.MoverSession.ChannelMessageSend(m.ChannelID, fmt.Sprintf(bot.Messages[utils.GetGuildLocale(bot.DB, m.GuildID)]["NotInGuild"], m.Author.Mention()))
 				return
 			}
 			if numParams == 2 {

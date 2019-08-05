@@ -130,7 +130,7 @@ func DetectPowerups(guildID string, servants []*discordgo.Session, rchan chan []
 	rchan <- workers
 }
 
-// MoveHelper prints the help text for this command
+// ListChannelsForHelpMessage creates a message with the channels in a server
 /*
 Inputs:
 	voiceChannels []*discordgo.Channel : list of all channels in the server (used to list the numbers)
@@ -167,7 +167,7 @@ func AskMember(s *discordgo.Session, member string, message string) error {
 
 // HaveIAskedMember function is used to send a private message to a guild member
 /*
-This function will return false in case of error and if the user recieved any message from a bot.
+This function will return false in case of error and if the user received any message from a bot.
 It checks the 10 last messages in the chat.
 */
 func HaveIAskedMember(s *discordgo.Session, member string) bool {

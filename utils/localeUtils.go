@@ -15,6 +15,14 @@ var langs = map[int]string{
 	4: "FR",
 }
 
+// Flags maps language codes to a emoji strings representing the flags of the countries
+var Flags = map[string]string{
+	"EN": ":flag_us:",
+	"PT": ":flag_br:",
+	"ES": ":flag_es:",
+	"FR": ":flag_fr:",
+}
+
 // SelectLang selects a language code based on number or string code
 /*
 Input:

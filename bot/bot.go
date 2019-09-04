@@ -119,6 +119,7 @@ func (bot *Bot) Start() error {
 	}
 
 	log.Println("Bot is fully running!")
+
 	return nil
 }
 
@@ -187,7 +188,7 @@ func (bot *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate)
 
 		// If no parameter was passed, show the help message
 		if numParams == 0 {
-			_, err := s.ChannelMessageSend(m.ChannelID, (bot.Messages.GeneralHelp(lang, m.Author.Mention(), bot.Prefix)))
+			_, err := s.ChannelMessageSendEmbed(m.ChannelID, bot.Messages.GeneralHelp(lang, m.Author.Mention(), bot.Prefix))
 			log.Println("", err)
 			return
 		}
@@ -217,20 +218,20 @@ func (bot *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate)
 			_, err := bot.MoverSession.Guild(m.GuildID) // retrieving the server (guild) the message was originated from
 			if err != nil {
 				log.Println(err)
-				_, _ = bot.MoverSession.ChannelMessageSend(m.ChannelID, bot.Messages.NotInGuild(utils.GetGuildLocale(bot.DB, m.GuildID), m.Author.Mention()))
+				_, _ = bot.MoverSession.ChannelMessageSendEmbed(m.ChannelID, bot.Messages.NotInGuild(utils.GetGuildLocale(bot.DB, m.GuildID), m.Author.Mention()))
 				return
 			}
 			if numParams == 2 {
 				chosenLang := utils.SelectLang(params[1])
 				_ = db.UpdateDataTuple(bot.DB, m.GuildID, chosenLang)
 				lang = chosenLang
-				_, _ = s.ChannelMessageSend(m.ChannelID, bot.Messages.LangSet(lang))
+				_, _ = s.ChannelMessageSendEmbed(m.ChannelID, bot.Messages.LangSet(lang))
 			} else {
-				_, _ = s.ChannelMessageSend(m.ChannelID, bot.Messages.LangSetupMessage(bot.Prefix))
+				_, _ = s.ChannelMessageSendEmbed(m.ChannelID, bot.Messages.LangSetupMessage(bot.Prefix))
 			}
 
 		default:
-			_, _ = s.ChannelMessageSend(m.ChannelID, bot.Messages.HelpMessage(lang, bot.Prefix))
+			_, _ = s.ChannelMessageSendEmbed(m.ChannelID, bot.Messages.HelpMessage(lang, bot.Prefix))
 		}
 	}
 }

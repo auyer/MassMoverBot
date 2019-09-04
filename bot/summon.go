@@ -18,19 +18,19 @@ func (bot *Bot) Summon(m *discordgo.MessageCreate, params []string) (string, err
 	guild, err := bot.MoverSession.Guild(m.GuildID) // retrieving the server (guild) the message was originated from
 	if err != nil {
 		log.Println(err)
-		_, _ = bot.MoverSession.ChannelMessageSend(m.ChannelID, bot.Messages.NotInGuild(utils.GetGuildLocale(bot.DB, m.GuildID), m.Author.Mention()))
+		_, _ = bot.MoverSession.ChannelMessageSendEmbed(m.ChannelID, bot.Messages.NotInGuild(utils.GetGuildLocale(bot.DB, m.GuildID), m.Author.Mention()))
 		return "", errors.New("notinguild")
 	}
 
 	destination := utils.GetUserCurrentChannel(bot.MoverSession, m.Author.ID, guild)
 
 	if destination == "" {
-		_, _ = bot.MoverSession.ChannelMessageSend(m.ChannelID, bot.Messages.CantFindUser(utils.GetGuildLocale(bot.DB, m.GuildID), bot.Prefix, m.Author.Username))
+		_, _ = bot.MoverSession.ChannelMessageSendEmbed(m.ChannelID, bot.Messages.CantFindUser(utils.GetGuildLocale(bot.DB, m.GuildID), bot.Prefix, m.Author.Username))
 		return "", errors.New("user not connected to any voice channel")
 	}
 
 	if !utils.CheckPermissions(bot.MoverSession, destination, m.Author.ID, discordgo.PermissionVoiceMoveMembers) {
-		_, _ = bot.MoverSession.ChannelMessageSend(m.ChannelID, bot.Messages.NoPermissionsDestination(utils.GetGuildLocale(bot.DB, m.GuildID)))
+		_, _ = bot.MoverSession.ChannelMessageSendEmbed(m.ChannelID, bot.Messages.NoPermissionsDestination(utils.GetGuildLocale(bot.DB, m.GuildID)))
 		return "", errors.New("no permission destination")
 	}
 	numParams := len(params)
@@ -40,7 +40,7 @@ func (bot *Bot) Summon(m *discordgo.MessageCreate, params []string) (string, err
 		if numParams == 3 {
 			log.Println("Received summon command with 3 parameters on " + guild.Name + " , ID: " + guild.ID + " , by :" + m.Author.ID)
 			if strings.ToLower(params[2]) != "afk" {
-				_, _ = bot.MoverSession.ChannelMessageSend(m.ChannelID, bot.Messages.SummonHelp(utils.GetGuildLocale(bot.DB, m.GuildID), bot.Prefix, utils.ListChannelsForHelpMessage(guild.Channels)))
+				_, _ = bot.MoverSession.ChannelMessageSendEmbed(m.ChannelID, bot.Messages.SummonHelp(utils.GetGuildLocale(bot.DB, m.GuildID), bot.Prefix, utils.ListChannelsForHelpMessage(guild.Channels)))
 
 				return "", nil
 			}
@@ -52,49 +52,49 @@ func (bot *Bot) Summon(m *discordgo.MessageCreate, params []string) (string, err
 
 			num, err := mover.MoveAllMembers(<-workerschann, m, guild, destination, afk)
 			if err != nil && num != "0" {
-				_, _ = bot.MoverSession.ChannelMessageSend(m.ChannelID, bot.Messages.CantMoveSomeUsers(utils.GetGuildLocale(bot.DB, m.GuildID)))
+				_, _ = bot.MoverSession.ChannelMessageSendEmbed(m.ChannelID, bot.Messages.CantMoveSomeUsers(utils.GetGuildLocale(bot.DB, m.GuildID)))
 			} else if err != nil {
 				if err.Error() == "no permission origin" {
-					_, _ = bot.MoverSession.ChannelMessageSend(m.ChannelID, bot.Messages.NoPermissionsOrigin(utils.GetGuildLocale(bot.DB, m.GuildID)))
+					_, _ = bot.MoverSession.ChannelMessageSendEmbed(m.ChannelID, bot.Messages.NoPermissionsOrigin(utils.GetGuildLocale(bot.DB, m.GuildID)))
 				} else if err.Error() == "bot permission" {
-					_, _ = bot.MoverSession.ChannelMessageSend(m.ChannelID, bot.Messages.BotNoPermission(utils.GetGuildLocale(bot.DB, m.GuildID)))
+					_, _ = bot.MoverSession.ChannelMessageSendEmbed(m.ChannelID, bot.Messages.BotNoPermission(utils.GetGuildLocale(bot.DB, m.GuildID)))
 				} else if err.Error() == "cant find user" {
-					_, _ = bot.MoverSession.ChannelMessageSend(m.ChannelID, bot.Messages.CantFindUser(utils.GetGuildLocale(bot.DB, m.GuildID), m.Author.Mention(), bot.Prefix))
+					_, _ = bot.MoverSession.ChannelMessageSendEmbed(m.ChannelID, bot.Messages.CantFindUser(utils.GetGuildLocale(bot.DB, m.GuildID), m.Author.Mention(), bot.Prefix))
 				} else {
-					_, _ = bot.MoverSession.ChannelMessageSend(m.ChannelID, bot.Messages.SorryBut(utils.GetGuildLocale(bot.DB, m.GuildID), err.Error()))
+					_, _ = bot.MoverSession.ChannelMessageSendEmbed(m.ChannelID, bot.Messages.SorryBut(utils.GetGuildLocale(bot.DB, m.GuildID), err.Error()))
 				}
 				return "", err
 			}
-			_, _ = bot.MoverSession.ChannelMessageSend(m.ChannelID, bot.Messages.JustMoved(utils.GetGuildLocale(bot.DB, m.GuildID), num))
+			_, _ = bot.MoverSession.ChannelMessageSendEmbed(m.ChannelID, bot.Messages.JustMoved(utils.GetGuildLocale(bot.DB, m.GuildID), num))
 			return num, err
 		}
 		destination, err := utils.GetChannel(guildChannels, params[1])
 		if err != nil {
-			_, _ = bot.MoverSession.ChannelMessageSend(m.ChannelID, bot.Messages.CantFindChannel(utils.GetGuildLocale(bot.DB, m.GuildID), params[1]))
+			_, _ = bot.MoverSession.ChannelMessageSendEmbed(m.ChannelID, bot.Messages.CantFindChannel(utils.GetGuildLocale(bot.DB, m.GuildID), params[1]))
 			return "", err
 		}
 
 		num, err := mover.MoveAllMembers(<-workerschann, m, guild, destination, afk)
 		if err != nil && num != "0" {
-			_, _ = bot.MoverSession.ChannelMessageSend(m.ChannelID, bot.Messages.CantMoveSomeUsers(utils.GetGuildLocale(bot.DB, m.GuildID)))
+			_, _ = bot.MoverSession.ChannelMessageSendEmbed(m.ChannelID, bot.Messages.CantMoveSomeUsers(utils.GetGuildLocale(bot.DB, m.GuildID)))
 		} else if err != nil {
 			if err.Error() == "no permission origin" {
-				_, _ = bot.MoverSession.ChannelMessageSend(m.ChannelID, bot.Messages.NoPermissionsOrigin(utils.GetGuildLocale(bot.DB, m.GuildID)))
+				_, _ = bot.MoverSession.ChannelMessageSendEmbed(m.ChannelID, bot.Messages.NoPermissionsOrigin(utils.GetGuildLocale(bot.DB, m.GuildID)))
 			} else if err.Error() == "bot permission" {
-				_, _ = bot.MoverSession.ChannelMessageSend(m.ChannelID, bot.Messages.BotNoPermission(utils.GetGuildLocale(bot.DB, m.GuildID)))
+				_, _ = bot.MoverSession.ChannelMessageSendEmbed(m.ChannelID, bot.Messages.BotNoPermission(utils.GetGuildLocale(bot.DB, m.GuildID)))
 			} else if err.Error() == "cant find user" {
-				_, _ = bot.MoverSession.ChannelMessageSend(m.ChannelID, bot.Messages.CantFindUser(utils.GetGuildLocale(bot.DB, m.GuildID), m.Author.Mention(), bot.Prefix))
+				_, _ = bot.MoverSession.ChannelMessageSendEmbed(m.ChannelID, bot.Messages.CantFindUser(utils.GetGuildLocale(bot.DB, m.GuildID), m.Author.Mention(), bot.Prefix))
 			} else {
-				_, _ = bot.MoverSession.ChannelMessageSend(m.ChannelID, bot.Messages.SorryBut(utils.GetGuildLocale(bot.DB, m.GuildID), err.Error()))
+				_, _ = bot.MoverSession.ChannelMessageSendEmbed(m.ChannelID, bot.Messages.SorryBut(utils.GetGuildLocale(bot.DB, m.GuildID), err.Error()))
 			}
 			return "", err
 		}
 
-		_, _ = bot.MoverSession.ChannelMessageSend(m.ChannelID, bot.Messages.JustMoved(utils.GetGuildLocale(bot.DB, m.GuildID), num))
+		_, _ = bot.MoverSession.ChannelMessageSendEmbed(m.ChannelID, bot.Messages.JustMoved(utils.GetGuildLocale(bot.DB, m.GuildID), num))
 		return num, err
 
 	}
-	_, _ = bot.MoverSession.ChannelMessageSend(m.ChannelID, bot.Messages.SummonHelp(utils.GetGuildLocale(bot.DB, m.GuildID), bot.Prefix, utils.ListChannelsForHelpMessage(guild.Channels)))
+	_, _ = bot.MoverSession.ChannelMessageSendEmbed(m.ChannelID, bot.Messages.SummonHelp(utils.GetGuildLocale(bot.DB, m.GuildID), bot.Prefix, utils.ListChannelsForHelpMessage(guild.Channels)))
 
 	return "", nil
 }

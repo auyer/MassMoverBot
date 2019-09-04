@@ -2,7 +2,8 @@
 
 [![GoDoc](https://godoc.org/github.com/golang/gddo?status.svg)](http://godoc.org/github.com/auyer/massmoverbot)
 [![Go Report Card](https://goreportcard.com/badge/github.com/auyer/massmoverbot)](https://goreportcard.com/report/github.com/auyer/massmoverbot)
-[![LICENSE MIT](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://img.shields.io/badge/license-MIT-brightgreen.svg) <!--  [![Release](https://img.shields.io/github/release/auyer/massmoverbot.svg)](https://github.com/auyer/massmoverbot/releases/latest) -->
+[![LICENSE](https://img.shields.io/github/license/auyer/massmoverbot)](https://github.com/auyer/MassMoverBot/blob/master/LICENSE) <!--  [![Release](https://img.shields.io/github/release/auyer/massmoverbot.svg)](https://github.com/auyer/massmoverbot/releases/latest) -->
+
 
 The MassMover bot is a Multi-Token Discord Bot.
 This can be used to split intensive operations, or API limited opperations like the "User Voice Channel Move" opperations.
@@ -29,6 +30,7 @@ The possible commands are:
  - `> move origin destination` -> moves users from the origin channel to the destination channel
 
     Example : `> move chat_x chat_y` , or `> move 1 2`
+ - `> summon` -> prints summon command help and all channels visible to the bot
  - `> lang` -> prints language configuration help message
  - `> lang option` -> changes the bot language to a specific language.
 

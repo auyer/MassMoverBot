@@ -156,12 +156,12 @@ func ListChannelsForHelpMessage(channels []*discordgo.Channel) string {
 }
 
 // AskMember function is used to send a private message to a guild member
-func AskMember(s *discordgo.Session, member string, message string) error {
+func AskMember(s *discordgo.Session, member string, message *discordgo.MessageEmbed) error {
 	c, err := s.UserChannelCreate(member)
 	if err != nil {
 		return err
 	}
-	_, err = s.ChannelMessageSend(c.ID, message) // event.Guild.OwnerID
+	_, err = s.ChannelMessageSendEmbed(c.ID, message) // event.Guild.OwnerID
 	return err
 }
 

@@ -198,22 +198,6 @@ func (bot *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate)
 		}
 
 		switch strings.ToLower(params[0]) {
-		case "move":
-			moved, err := bot.Move(m, params)
-			if err != nil {
-
-				return
-			}
-			bot.bumpStatistics(moved)
-
-		case "summon":
-			moved, err := bot.Summon(m, params)
-			if err != nil {
-
-				return
-			}
-			bot.bumpStatistics(moved)
-
 		case "lang":
 			_, err := bot.MoverSession.Guild(m.GuildID) // retrieving the server (guild) the message was originated from
 			if err != nil {
@@ -229,6 +213,20 @@ func (bot *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate)
 			} else {
 				_, _ = s.ChannelMessageSendEmbed(m.ChannelID, bot.Messages.LangSetupMessage(bot.Prefix))
 			}
+		case "summon":
+			moved, err := bot.Summon(m, params)
+			if err != nil {
+
+				return
+			}
+			bot.bumpStatistics(moved)
+		case "move":
+			moved, err := bot.Move(m, params)
+			if err != nil {
+
+				return
+			}
+			bot.bumpStatistics(moved)
 
 		default:
 			_, _ = s.ChannelMessageSendEmbed(m.ChannelID, bot.Messages.HelpMessage(lang, bot.Prefix))

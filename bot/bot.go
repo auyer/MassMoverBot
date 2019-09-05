@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/auyer/massmoverbot/config"
 	"github.com/auyer/massmoverbot/db"
@@ -24,10 +25,12 @@ type Bot struct {
 	DB              *badger.DB
 	PowerupSessions []*discordgo.Session
 	Messages        *utils.Message
+	Closing         chan int
 }
 
 // Close function ends the bot connection and closes its database
 func (bot *Bot) Close() {
+	bot.Closing <- 1
 	log.Println("Shutting Down bot")
 	err := bot.MoverSession.Close()
 	if err != nil {
@@ -64,7 +67,8 @@ func (bot *Bot) setupBot(s *discordgo.Session) error {
 
 // Init creates the first bot object
 func Init(configs config.ConfigurationParameters, messages *utils.Message, conn *badger.DB) *Bot {
-	return &Bot{Prefix: configs.BotPrefix, MoverBotToken: configs.MoverBotToken, PowerupTokens: configs.PowerupTokens, Messages: messages, DB: conn}
+	c := make(chan int)
+	return &Bot{Prefix: configs.BotPrefix, MoverBotToken: configs.MoverBotToken, PowerupTokens: configs.PowerupTokens, Messages: messages, DB: conn, Closing: c}
 }
 
 // Start function connects and ads the necessary handlers
@@ -119,7 +123,33 @@ func (bot *Bot) Start() error {
 	}
 
 	log.Println("Bot is fully running!")
+	go func() {
+		for {
+			select {
+			case <-bot.Closing:
+				fmt.Println("halted Status Update")
+				break
+			case <-time.After(120 * time.Second):
+				// log.Println("Updating Statistics")
+				bytesStats, err := db.GetDataTupleBytes(bot.DB, "statistics")
+				if err != nil {
+					log.Println("Failed to get Statistics")
+					return
+				}
+				stats := map[string]int{}
+				err = json.Unmarshal(bytesStats, &stats)
+				if err != nil {
+					log.Println("Failed to decode Statistics")
+					return
+				}
+				_ = bot.MoverSession.UpdateStatus(0, fmt.Sprintf("Moved %d players \n ! %s help", stats["usrs"], bot.Prefix))
+				for _, powerupSession := range bot.PowerupSessions {
+					_ = powerupSession.UpdateStatus(0, fmt.Sprintf("Moved %d players \n ! %s help", stats["usrs"], bot.Prefix))
+				}
+			}
+		}
 
+	}() // this loop will update the bot status every 120 seconds
 	return nil
 }
 
@@ -249,11 +279,6 @@ func (bot *Bot) bumpStatistics(moved string) {
 	}
 	movedInt, _ := strconv.Atoi(moved)
 	stats["usrs"] += movedInt
-	_ = bot.MoverSession.UpdateStatus(0, fmt.Sprintf("Moved %d players \n ! %s help", stats["usrs"], bot.Prefix))
-	for _, powerupSession := range bot.PowerupSessions {
-		_ = powerupSession.UpdateStatus(0, fmt.Sprintf("Moved %d players \n ! %s help", stats["usrs"], bot.Prefix))
-	}
-	stats["movs"]++
 	bytesStats, _ = json.Marshal(stats)
 	err = db.UpdateDataTupleBytes(bot.DB, "statistics", bytesStats)
 	if err != nil {

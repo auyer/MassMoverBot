@@ -143,12 +143,10 @@ func ListChannelsForHelpMessage(channels []*discordgo.Channel) string {
 		return channels[i].Position < channels[j].Position
 	})
 
-	i := 0
 	channelHelpList := ""
 	for _, channel := range channels {
 		if channel.Type == discordgo.ChannelTypeGuildVoice {
-			i++
-			channelHelpList = channelHelpList + strconv.Itoa(i) + " ) " + channel.Name + "\n"
+			channelHelpList = channelHelpList + strconv.Itoa(channel.Position+1) + " ) " + channel.Name + "\n"
 		}
 	}
 

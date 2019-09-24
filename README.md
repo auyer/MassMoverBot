@@ -2,7 +2,8 @@
 
 [![GoDoc](https://godoc.org/github.com/golang/gddo?status.svg)](http://godoc.org/github.com/auyer/massmoverbot)
 [![Go Report Card](https://goreportcard.com/badge/github.com/auyer/massmoverbot)](https://goreportcard.com/report/github.com/auyer/massmoverbot)
-[![LICENSE MIT](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://img.shields.io/badge/license-MIT-brightgreen.svg) <!--  [![Release](https://img.shields.io/github/release/auyer/massmoverbot.svg)](https://github.com/auyer/massmoverbot/releases/latest) -->
+[![LICENSE MIT](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://img.shields.io/badge/license-MIT-brightgreen.svg) [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fauyer%2FMassMoverBot.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fauyer%2FMassMoverBot?ref=badge_shield)
+<!--  [![Release](https://img.shields.io/github/release/auyer/massmoverbot.svg)](https://github.com/auyer/massmoverbot/releases/latest) -->
 
 The MassMover bot is a Multi-Token Discord Bot.
 This can be used to split intensive operations, or API limited opperations like the "User Voice Channel Move" opperations.
@@ -74,3 +75,7 @@ To build the messages, it is necessary to get the statik package, and run the co
 go get github.com/rakyll/statik
 statik
 ```
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fauyer%2FMassMoverBot.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fauyer%2FMassMoverBot?ref=badge_large)

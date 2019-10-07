@@ -45,11 +45,11 @@ EN:
   MoveHelper: |
     These are the possible *move* commands\:
 
-    %s move - View this help and the list of available channels
+    \%s move - View this help and the list of available channels
 
-    %s move *destination* - Move all users from your current channel to the *destination* channel
+    \%s move *destination* - Move all users from your current channel to the *destination* channel
 
-    %s move *origin* *destination* - Move all users from *origin* to the *destination*
+    \%s move *origin* *destination* - Move all users from *origin* to the *destination*
 
     PS.\: *origin* and *destination* can be the channels number or the channels name.
 
@@ -58,15 +58,15 @@ EN:
   SummonHelp: |
     The summon feature will move all users from all voice channels to the specified channel.
 
-    %s summon - Display this help message and the list of available channels.
+    \%s summon - Display this help message and the list of available channels.
 
-    %s summon all - Move all users from all channels to your current channel.
+    \%s summon all - Move all users from all channels to your current channel.
 
-    %s summon all afk - Move all users from all channels to your current channel. Even from the AFK channel.
+    \%s summon all afk - Move all users from all channels to your current channel. Even from the AFK channel.
 
-    %s summon *destination* - Move all users from all channels to the *destination* channel.
+    \%s summon *destination* - Move all users from all channels to the *destination* channel.
     
-    %s summon *destination* afk - Move all users from all channels to the *destination* channel. Even from the AFK channel.
+    \%s summon *destination* afk - Move all users from all channels to the *destination* channel. Even from the AFK channel.
 
     List of available channels \:
     %s
@@ -94,11 +94,11 @@ PT:
   MoveHelper: |
     Esses são os comando possíveis para mover membros\:
 
-    %s move - Veja esta mensagem de ajuda e a lista de canais disponíveis.
+    \%s move - Veja esta mensagem de ajuda e a lista de canais disponíveis.
 
-    %s move *destino* - Move todos os usuários do seu canal atual para o canal de *destino*.
+    \%s move *destino* - Move todos os usuários do seu canal atual para o canal de *destino*.
 
-    %s move *origem* *destino* - Move todos os usuários do canal de *origem* para o canal de *destino*.
+    \%s move *origem* *destino* - Move todos os usuários do canal de *origem* para o canal de *destino*.
 
     PS.\: *origem* e *destino* podem sem os números ou os nomes dos canais.
 
@@ -107,15 +107,15 @@ PT:
   SummonHelp: |
     O recurso de convocação moverá todos os usuários de todos os canais de voz para o canal especificado.
 
-    %s summon - Exibir esta mensagem de ajuda e a lista de canais disponíveis.
+    \%s summon - Exibir esta mensagem de ajuda e a lista de canais disponíveis.
 
-    %s summon all - Mova todos os usuários de todos os canais de voz para o seu canal.
+    \%s summon all - Mova todos os usuários de todos os canais de voz para o seu canal.
 
-    %s summon all afk - Mova todos os usuários de todos os canais de voz para o seu canal. Incluindo usuários do canal AFK.
+    \%s summon all afk - Mova todos os usuários de todos os canais de voz para o seu canal. Incluindo usuários do canal AFK.
 
-    %s summon *destino* - Mova todos os usuários de todos os canais de voz para o canal especificado.
+    \%s summon *destino* - Mova todos os usuários de todos os canais de voz para o canal especificado.
     
-    %s summon *destino* afk - Mova todos os usuários de todos os canais de voz para o canal especificado. Incluindo usuários do canal AFK.
+    \%s summon *destino* afk - Mova todos os usuários de todos os canais de voz para o canal especificado. Incluindo usuários do canal AFK.
     
     Lista de canais disponíveis \:
     %s
@@ -144,11 +144,11 @@ ES:
   MoveHelper: |
     Estos son los comandos *move* disponibles\:
 
-    %s move - Despliega esta ayuda y una lista de los canales disponibles.
+    \%s move - Despliega esta ayuda y una lista de los canales disponibles.
 
-    %s move *destino* - Mueve a todos los usuarios de tu canual actual al canal *destination* 
+    \%s move *destino* - Mueve a todos los usuarios de tu canual actual al canal *destination* 
 
-    %s move *origen* *destino* - Mueve a todos los usuarios del canal *origin* al canal *destination*
+    \%s move *origen* *destino* - Mueve a todos los usuarios del canal *origin* al canal *destination*
 
     PS.\: *origen* and *destino* pueden ser los numeros de los canales o los nombres.
 
@@ -157,15 +157,15 @@ ES:
   SummonHelp: |
     La herramienta summon moverá a todos los usuarios conectados a los canales de voz a un canal deseado.
 
-    %s summon - Muestra este mensaje de ayuda y una lista de los canales disponibles.
+    \%s summon - Muestra este mensaje de ayuda y una lista de los canales disponibles.
 
-    %s summon all - Mueve a todos los usuarios de los canales de voz a tu canal actual.
+    \%s summon all - Mueve a todos los usuarios de los canales de voz a tu canal actual.
 
-    %s summon all afk - Mueve a todos los usuarios de los canales de voz a tu canal actual. Incluye el canal AFK.
+    \%s summon all afk - Mueve a todos los usuarios de los canales de voz a tu canal actual. Incluye el canal AFK.
 
-    %s summon *destination* - Mueve a todos los usuarios de todos los canales al canal *destino*
+    \%s summon *destination* - Mueve a todos los usuarios de todos los canales al canal *destino*
 
-    %s summon *destination* afk - Mueve a todos los usuarios de todos los canales al canal *destino*. Incluye el canal AFK.
+    \%s summon *destination* afk - Mueve a todos los usuarios de todos los canales al canal *destino*. Incluye el canal AFK.
 
     Lista de canales disponibles \:
     %s
@@ -195,11 +195,11 @@ FR :
   MoveHelper: |
     Commandes *move* possibles\: 
 
-    %s move - Voir ce message et lister les canaux vocaux disponibles
+    \%s move - Voir ce message et lister les canaux vocaux disponibles
 
-    %s move *destination* - Déplacer tous les utilisateurs de ton canal vocal actuel vers le canal *destination*
+    \%s move *destination* - Déplacer tous les utilisateurs de ton canal vocal actuel vers le canal *destination*
 
-    %s move *origine* *destination* - Déplacer tous les utilisateurs depuis *origine* vers *destination*
+    \%s move *origine* *destination* - Déplacer tous les utilisateurs depuis *origine* vers *destination*
 
     PS.\: *origin* et *destination* peuvent être des IDs ou des noms de canal.
     
@@ -208,15 +208,15 @@ FR :
   SummonHelp: |
     La fonctionnalité "summon" consiste à déplacer tous les utilisateurs de tous les canaux vocaux dans un même canal spécifié.
 
-    %s summon - Voir ce message d'aide et lister les canaux vocaux disponibles
+    \%s summon - Voir ce message d'aide et lister les canaux vocaux disponibles
 
-    %s summon all - Déplacer tous les utilisateurs connectés en vocal dans ton canal actuel.
+    \%s summon all - Déplacer tous les utilisateurs connectés en vocal dans ton canal actuel.
 
-    %s summon all afk - Déplacer tous les utilisateurs connectés en vocal, même les AFK, dans ton canal actuel.
+    \%s summon all afk - Déplacer tous les utilisateurs connectés en vocal, même les AFK, dans ton canal actuel.
 
-    %s summon *destination* - Déplacer tous les utilisateurs de tous les canaux dans le canal de *destination*
+    \%s summon *destination* - Déplacer tous les utilisateurs de tous les canaux dans le canal de *destination*
     
-    %s summon *destination* afk - Déplacer tous les utilisateurs de tous les canaux, même AFK, dans le canal de *destination*
+    \%s summon *destination* afk - Déplacer tous les utilisateurs de tous les canaux, même AFK, dans le canal de *destination*
 
     Liste des canaux disponibles \:
     %s

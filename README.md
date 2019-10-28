@@ -2,8 +2,7 @@
 
 [![GoDoc](https://godoc.org/github.com/golang/gddo?status.svg)](http://godoc.org/github.com/auyer/massmoverbot)
 [![Go Report Card](https://goreportcard.com/badge/github.com/auyer/massmoverbot)](https://goreportcard.com/report/github.com/auyer/massmoverbot)
-[![LICENSE](https://img.shields.io/github/license/auyer/massmoverbot)](https://github.com/auyer/MassMoverBot/blob/master/LICENSE) <!--  [![Release](https://img.shields.io/github/release/auyer/massmoverbot.svg)](https://github.com/auyer/massmoverbot/releases/latest) -->
-
+[![LICENSE MIT](https://img.shields.io/github/license/auyer/massmoverbot)](https://github.com/auyer/MassMoverBot/blob/master/LICENSE) <!--  [![Release](https://img.shields.io/github/release/auyer/massmoverbot.svg)](https://github.com/auyer/massmoverbot/releases/latest) -->
 
 The MassMover bot is a Multi-Token Discord Bot.
 This can be used to split intensive operations, or API limited opperations like the "User Voice Channel Move" opperations.
@@ -72,7 +71,11 @@ go build .
 All messages are stored in [public/messages.yaml](public/messages.yaml) file, and loaded by the `Statik` pre compilation.
 To build the messages, it is necessary to get the statik package, and run the command in the root if the commanderBot repository.
 
-````
+```
 go get github.com/rakyll/statik
 statik
 ```
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fauyer%2FMassMoverBot.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fauyer%2FMassMoverBot?ref=badge_large)

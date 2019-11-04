@@ -130,7 +130,6 @@ func (bot *Bot) Start() error {
 				fmt.Println("halted Status Update")
 				break
 			case <-time.After(120 * time.Second):
-				// log.Println("Updating Statistics")
 				bytesStats, err := db.GetDataTupleBytes(bot.DB, "statistics")
 				if err != nil {
 					log.Println("Failed to get Statistics")

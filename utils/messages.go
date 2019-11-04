@@ -238,13 +238,3 @@ func memsetLoop(a []interface{}, v interface{}) {
 		a[i] = v
 	}
 }
-
-// func variadicJoin(interfaceLists ...[]interface{}) []interface{} {
-// 	var result []interface{}
-// 	for _, list := range interfaceLists {
-// 		for _, item := range list {
-// 			result = append(result, item)
-// 		}
-// 	}
-// 	return result
-// }

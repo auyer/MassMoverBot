@@ -3,9 +3,6 @@ package utils
 import (
 	"strconv"
 	"strings"
-
-	"github.com/auyer/massmoverbot/db"
-	"github.com/dgraph-io/badger"
 )
 
 var langs = map[int]string{
@@ -52,21 +49,4 @@ func SelectLang(choice string) string {
 	default:
 		return "EN"
 	}
-}
-
-// GetGuildLocale function will return the language for a guild, returning EN by default.
-/*
-Input:
-	conn *badger.DB : a connection with the badger db
-	GuildID string : the ID of the guild
-Output:
-	language string
-*/
-func GetGuildLocale(conn *badger.DB, GuildID string) string {
-	lang, err := db.GetDataTuple(conn, GuildID)
-	if err != nil {
-		lang = "EN"
-	}
-
-	return lang
 }

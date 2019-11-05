@@ -1,13 +1,12 @@
-package db
+package bdb
 
 import (
-	"log"
 	"os"
 	"testing"
 )
 
 const (
-	dbPath    = "./fastgate.db_test.go.db"
+	dbPath    = "./massmoverbot.db_test.go.db"
 	testKey   = "TestKey"
 	testValue = "TestValue"
 )
@@ -16,29 +15,29 @@ func TestDatabase(t *testing.T) {
 	if _, err := os.Stat(dbPath); !os.IsNotExist(err) {
 		err = os.RemoveAll(dbPath)
 		if err != nil {
-			log.Fatal("Unable to clean Test Database Before testing. Check for permissions.")
+			t.Fatal("Unable to clean Test Database Before testing. Check for permissions.")
 		}
 	}
 	database, err := ConnectDB(dbPath)
 	if err != nil {
 		t.Errorf("Unable to Init Database")
 	}
-	err = UpdateEndpoint(database, testKey, testValue)
+	err = UpdateDataTuple(database, testKey, testValue)
 	if err != nil {
 		t.Errorf("Unable to Insert Tuple")
 	}
-	value, err := GetEndpoint(database, testKey)
+	value, err := GetDataTuple(database, testKey)
 	if err != nil {
 		t.Errorf("Unable to Fetch Tuple")
 	}
 	if value != testValue {
 		t.Errorf("Received Value not mathing with what was inserted.")
 	}
-	values, err := GetEndpoints(database)
+	values, err := GetDataTuples(database)
 	if err != nil {
 		t.Errorf("Unable to Fetch Tuple")
 	}
-	testValues := []Endpoint{{testKey, testValue}}
+	testValues := []DataTuple{{testKey, testValue}}
 	if values[0] != testValues[0] {
 		t.Errorf("Received Value not mathing with what was inserted.")
 	}
@@ -48,6 +47,6 @@ func TestDatabase(t *testing.T) {
 	}
 	err = os.RemoveAll(dbPath)
 	if err != nil {
-		log.Printf("Unable to clean Test Database Aftere test. Check for permissions, and remove foleder '%s' or Future Tests might Fail", dbPath)
+		t.Logf("Unable to clean Test Database Aftere test. Check for permissions, and remove foleder '%s' or Future Tests might Fail", dbPath)
 	}
 }

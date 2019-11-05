@@ -1,11 +1,8 @@
-// Package db manages data stored about the servers
+// Package bdb manages data stored about the servers
 // The storage is performed by a Key-Value community database called Badger.
-package db
+package bdb
 
 import (
-	"os"
-	"path/filepath"
-
 	"github.com/dgraph-io/badger"
 )
 
@@ -14,53 +11,6 @@ type DataTuple struct {
 	Key   string `json:"Key"`
 	Value string `json:"Value"`
 }
-
-// THIS SECTION REFERS TO MULTIPLE DBs. Unused atm
-// // PointerDict structure stores pointers to the databases and a Mutex lock for preventing wrong usage of pointers.
-// var PointerDict = struct {
-// 	sync.RWMutex
-// 	Dict map[string]*badger.DB
-// }{Dict: make(map[string]*badger.DB)}
-
-// // CloseDatabases close all databases in the PointerDict structure
-// func CloseDatabases() {
-// 	PointerDict.Lock()
-// 	for _, i := range PointerDict.Dict {
-// 		i.Lock()
-// 		err := i.Close()
-// 		if err != nil {
-// 			log.Println("[DB] " + err.Error())
-// 		}
-// 	}
-// 	PointerDict.Unlock()
-// }
-
-// RemoveDatabase function deletes the database in a folder
-func RemoveDatabase(dir, id string) error {
-	d, err := os.Open(dir)
-	if err != nil {
-		return err
-	}
-	defer d.Close()
-	names, err := d.Readdirnames(-1)
-	if err != nil {
-		return err
-	}
-	for _, name := range names {
-		if name == id {
-			err = os.RemoveAll(filepath.Join(dir, name))
-			if err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
-
-// // ConnectDB manages the database connection and configuration.
-// func ConnectDB(databasePath string) (*badger.DB, error) {
-// 	return connectDB(fmt.Sprintf(databasePath))
-// }
 
 // ConnectDB manages the database connection and configuration.
 func ConnectDB(databasePath string) (*badger.DB, error) {

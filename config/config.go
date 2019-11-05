@@ -26,7 +26,7 @@ type ConfigurationParameters struct {
 }
 
 const (
-	version = "0.5-beta"
+	version = "1.0"
 	website = "github.com/auyer/massmoverbot/"
 )
 

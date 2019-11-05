@@ -1,0 +1,19 @@
+---
+LANG:
+  WelcomeAndLang: 4
+  LangSetupMessage: 4
+MESSAGES:
+  LangSet: 0
+  CantFindChannel: 1
+  CantFindUser: 2
+  CantMoveSomeUsers: 0
+  BotNoPermission: 0
+  GeneralHelp: 2 # p m
+  NotInGuild: 1
+  HelpMessage: 3
+  JustMoved: 1
+  MoveHelper: 4
+  SummonHelp: 6
+  NoPermissionsDestination: 0
+  NoPermissionsOrigin: 0
+  SorryBut: 1

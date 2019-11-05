@@ -11,6 +11,7 @@ import (
 	"os"
 
 	"github.com/auyer/massmoverbot/db"
+	"github.com/auyer/massmoverbot/utils"
 	"github.com/dgraph-io/badger"
 	"github.com/rakyll/statik/fs"
 	"gopkg.in/yaml.v3"
@@ -30,10 +31,9 @@ const (
 )
 
 // Init runs all steps of configuration including printing some messages to the terminal
-func Init() (ConfigurationParameters, map[string]map[string]string, *badger.DB, error) {
+func Init() (ConfigurationParameters, *utils.Message, *badger.DB, error) {
 	configFileLocation := flag.String("config", "./config.json", "Configuration File Location")
 	flag.Parse()
-
 	statikFS, err := fs.New()
 	if err != nil {
 		return ConfigurationParameters{}, nil, nil, err
@@ -41,21 +41,31 @@ func Init() (ConfigurationParameters, map[string]map[string]string, *badger.DB, 
 
 	messages, err := initLocales(statikFS)
 	if err != nil {
-		return ConfigurationParameters{}, messages, nil, err
+		return ConfigurationParameters{}, nil, nil, err
 	}
+	messageFormaters, err := initLocaleFormatting(statikFS)
+	if err != nil {
+		return ConfigurationParameters{}, nil, nil, err
+	}
+
+	messagePack := &utils.Message{
+		Messages:           messages,
+		FormaterDirectives: messageFormaters,
+	}
+
 	displayBanner(statikFS)
 
 	configs, err := readConfig(*configFileLocation)
 	if err != nil {
-		return configs, messages, nil, err
+		return configs, messagePack, nil, err
 	}
 
 	conn, err := initDB(configs.DatabasePath)
 	if err != nil {
-		return configs, messages, conn, err
+		return configs, messagePack, conn, err
 	}
 
-	return configs, messages, conn, nil
+	return configs, messagePack, conn, nil
 }
 
 // readConfig function reads from the json file and stores the values
@@ -131,6 +141,23 @@ func initLocales(statikFS http.FileSystem) (map[string]map[string]string, error)
 
 	byteValue, _ := ioutil.ReadAll(mesagesFile)
 	var messages map[string]map[string]string
+	err = yaml.Unmarshal(byteValue, &messages)
+	if err != nil {
+		log.Fatal(err)
+		return nil, err
+	}
+	return messages, nil
+}
+
+func initLocaleFormatting(statikFS http.FileSystem) (map[string]map[string]int, error) {
+	mesagesFile, err := statikFS.Open("/messageFormaters.yaml")
+	if err != nil {
+		log.Print(err.Error())
+		return nil, err
+	}
+
+	byteValue, _ := ioutil.ReadAll(mesagesFile)
+	var messages map[string]map[string]int
 	err = yaml.Unmarshal(byteValue, &messages)
 	if err != nil {
 		log.Fatal(err)

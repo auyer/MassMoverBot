@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/auyer/massmoverbot/config"
 	"github.com/auyer/massmoverbot/db"
@@ -23,11 +24,13 @@ type Bot struct {
 	PowerupTokens   []string
 	DB              *badger.DB
 	PowerupSessions []*discordgo.Session
-	Messages        map[string]map[string]string
+	Messages        *utils.Message
+	Closing         chan int
 }
 
 // Close function ends the bot connection and closes its database
 func (bot *Bot) Close() {
+	bot.Closing <- 1
 	log.Println("Shutting Down bot")
 	err := bot.MoverSession.Close()
 	if err != nil {
@@ -63,8 +66,9 @@ func (bot *Bot) setupBot(s *discordgo.Session) error {
 }
 
 // Init creates the first bot object
-func Init(configs config.ConfigurationParameters, messages map[string]map[string]string, conn *badger.DB) *Bot {
-	return &Bot{Prefix: configs.BotPrefix, MoverBotToken: configs.MoverBotToken, PowerupTokens: configs.PowerupTokens, Messages: messages, DB: conn}
+func Init(configs config.ConfigurationParameters, messages *utils.Message, conn *badger.DB) *Bot {
+	c := make(chan int)
+	return &Bot{Prefix: configs.BotPrefix, MoverBotToken: configs.MoverBotToken, PowerupTokens: configs.PowerupTokens, Messages: messages, DB: conn, Closing: c}
 }
 
 // Start function connects and ads the necessary handlers
@@ -119,6 +123,32 @@ func (bot *Bot) Start() error {
 	}
 
 	log.Println("Bot is fully running!")
+	go func() {
+		for {
+			select {
+			case <-bot.Closing:
+				fmt.Println("halted Status Update")
+				break
+			case <-time.After(120 * time.Second):
+				bytesStats, err := db.GetDataTupleBytes(bot.DB, "statistics")
+				if err != nil {
+					log.Println("Failed to get Statistics")
+					return
+				}
+				stats := map[string]int{}
+				err = json.Unmarshal(bytesStats, &stats)
+				if err != nil {
+					log.Println("Failed to decode Statistics")
+					return
+				}
+				_ = bot.MoverSession.UpdateStatus(0, fmt.Sprintf("Moved %d players \n ! %s help", stats["usrs"], bot.Prefix))
+				for _, powerupSession := range bot.PowerupSessions {
+					_ = powerupSession.UpdateStatus(0, fmt.Sprintf("Moved %d players \n ! %s help", stats["usrs"], bot.Prefix))
+				}
+			}
+		}
+
+	}() // this loop will update the bot status every 120 seconds
 	return nil
 }
 
@@ -152,7 +182,7 @@ func (bot *Bot) guildCreate(s *discordgo.Session, event *discordgo.GuildCreate) 
 	if err != nil {
 		if err == badger.ErrKeyNotFound || val == "" {
 			if !utils.HaveIAskedMember(s, event.Guild.OwnerID) {
-				err = utils.AskMember(s, event.Guild.OwnerID, fmt.Sprintf(bot.Messages["LANG"]["WelcomeAndLang"], bot.Prefix, bot.Prefix, bot.Prefix, bot.Prefix))
+				err = utils.AskMember(s, event.Guild.OwnerID, bot.Messages.WelcomeAndLang(bot.Prefix))
 				if err != nil {
 					log.Println("Failed to send message to owner.")
 					return
@@ -187,7 +217,7 @@ func (bot *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate)
 
 		// If no parameter was passed, show the help message
 		if numParams == 0 {
-			_, err := s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(bot.Messages[lang]["GeneralHelp"], m.Author.Mention(), bot.Prefix))
+			_, err := s.ChannelMessageSendEmbed(m.ChannelID, bot.Messages.GeneralHelp(lang, m.Author.Mention(), bot.Prefix))
 			log.Println("", err)
 			return
 		}
@@ -197,6 +227,28 @@ func (bot *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate)
 		}
 
 		switch strings.ToLower(params[0]) {
+		case "lang":
+			_, err := bot.MoverSession.Guild(m.GuildID) // retrieving the server (guild) the message was originated from
+			if err != nil {
+				log.Println(err)
+				_, _ = bot.MoverSession.ChannelMessageSendEmbed(m.ChannelID, bot.Messages.NotInGuild(utils.GetGuildLocale(bot.DB, m.GuildID), m.Author.Mention()))
+				return
+			}
+			if numParams == 2 {
+				chosenLang := utils.SelectLang(params[1])
+				_ = db.UpdateDataTuple(bot.DB, m.GuildID, chosenLang)
+				lang = chosenLang
+				_, _ = s.ChannelMessageSendEmbed(m.ChannelID, bot.Messages.LangSet(lang))
+			} else {
+				_, _ = s.ChannelMessageSendEmbed(m.ChannelID, bot.Messages.LangSetupMessage(bot.Prefix))
+			}
+		case "summon":
+			moved, err := bot.Summon(m, params)
+			if err != nil {
+
+				return
+			}
+			bot.bumpStatistics(moved)
 		case "move":
 			moved, err := bot.Move(m, params)
 			if err != nil {
@@ -205,32 +257,8 @@ func (bot *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate)
 			}
 			bot.bumpStatistics(moved)
 
-		case "summon":
-			moved, err := bot.Summon(m, params)
-			if err != nil {
-
-				return
-			}
-			bot.bumpStatistics(moved)
-
-		case "lang":
-			_, err := bot.MoverSession.Guild(m.GuildID) // retrieving the server (guild) the message was originated from
-			if err != nil {
-				log.Println(err)
-				_, _ = bot.MoverSession.ChannelMessageSend(m.ChannelID, fmt.Sprintf(bot.Messages[utils.GetGuildLocale(bot.DB, m.GuildID)]["NotInGuild"], m.Author.Mention()))
-				return
-			}
-			if numParams == 2 {
-				chosenLang := utils.SelectLang(params[1])
-				_ = db.UpdateDataTuple(bot.DB, m.GuildID, chosenLang)
-				lang = chosenLang
-				_, _ = s.ChannelMessageSend(m.ChannelID, bot.Messages[lang]["LangSet"])
-			} else {
-				_, _ = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(bot.Messages["LANG"]["LangSetupMessage"], bot.Prefix, bot.Prefix, bot.Prefix, bot.Prefix))
-			}
-
 		default:
-			_, _ = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf(bot.Messages[lang]["HelpMessage"], bot.Prefix, bot.Prefix, bot.Prefix))
+			_, _ = s.ChannelMessageSendEmbed(m.ChannelID, bot.Messages.HelpMessage(lang, bot.Prefix))
 		}
 	}
 }
@@ -250,11 +278,6 @@ func (bot *Bot) bumpStatistics(moved string) {
 	}
 	movedInt, _ := strconv.Atoi(moved)
 	stats["usrs"] += movedInt
-	_ = bot.MoverSession.UpdateStatus(0, fmt.Sprintf("Moved %d players \n ! %s help", stats["usrs"], bot.Prefix))
-	for _, powerupSession := range bot.PowerupSessions {
-		_ = powerupSession.UpdateStatus(0, fmt.Sprintf("Moved %d players \n ! %s help", stats["usrs"], bot.Prefix))
-	}
-	stats["movs"]++
 	bytesStats, _ = json.Marshal(stats)
 	err = db.UpdateDataTupleBytes(bot.DB, "statistics", bytesStats)
 	if err != nil {

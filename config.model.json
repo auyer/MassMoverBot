@@ -7,5 +7,6 @@
     "BotPrefix": "-c",
     "BotID": "get it here : discordapp.com/developers/applications/",
     "BotSecret": "get it here : discordapp.com/developers/applications/",
-    "DatabasePath": "./databases/"
+    "DatabasePath": "./databases/",
+    "PublicURL": "http://localhost:8080"
 }

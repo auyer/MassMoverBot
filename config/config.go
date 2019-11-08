@@ -25,6 +25,7 @@ type ConfigurationParameters struct {
 	BotSecret     string   `json:"BotSecret"`
 	BotPrefix     string   `json:"BotPrefix"`
 	DatabasePath  string   `json:"DatabasePath"`
+	PublicURL     string   `json:"PublicURL"`
 }
 
 const (
@@ -67,7 +68,7 @@ func Init() (ConfigurationParameters, *utils.Message, db.DataStorage, *oauth2.Co
 	}
 
 	oauth2Config := &oauth2.Config{
-		RedirectURL:  "http://localhost:8080/api/callback",
+		RedirectURL:  configs.PublicURL + "/api/callback",
 		ClientID:     configs.BotID,
 		ClientSecret: configs.BotSecret,
 		Scopes:       []string{"identify", "guilds"},

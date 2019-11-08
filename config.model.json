@@ -1,6 +1,11 @@
 {
-    "MoverBotToken" : "MoverBotToken",
-    "PowerupTokens" : ["servantToken1", "servantToken2"],
-    "BotPrefix" : "-c",
-    "DatabasePath" : "./databases/"
+    "MoverBotToken": "MoverBotToken",
+    "PowerupTokens": [
+        "servantToken1",
+        "servantToken2"
+    ],
+    "BotPrefix": "-c",
+    "BotID": "get it here : discordapp.com/developers/applications/",
+    "BotSecret": "get it here : discordapp.com/developers/applications/",
+    "DatabasePath": "./databases/"
 }

@@ -17,7 +17,7 @@ func (m *Message) WelcomeAndLang(insertions string) *discordgo.MessageEmbed {
 	a := make([]interface{}, m.FormaterDirectives["LANG"]["WelcomeAndLang"])
 	memsetLoop(a, insertions)
 	return &discordgo.MessageEmbed{
-		// Title:       ":globe_with_meridians:",
+		Title:       ":globe_with_meridians:",
 		Description: fmt.Sprintf(m.Messages["LANG"]["WelcomeAndLang"], a...),
 		Color:       0x0099ff,
 		Footer: &discordgo.MessageEmbedFooter{

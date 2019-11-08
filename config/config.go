@@ -13,6 +13,7 @@ import (
 	"github.com/auyer/massmoverbot/db/bdb"
 	"github.com/auyer/massmoverbot/utils"
 	"github.com/rakyll/statik/fs"
+	"golang.org/x/oauth2"
 	"gopkg.in/yaml.v3"
 )
 
@@ -20,6 +21,8 @@ import (
 type ConfigurationParameters struct {
 	MoverBotToken string   `json:"MoverBotToken"`
 	PowerupTokens []string `json:"PowerupTokens"`
+	BotID         string   `json:"BotID"`
+	BotSecret     string   `json:"BotSecret"`
 	BotPrefix     string   `json:"BotPrefix"`
 	DatabasePath  string   `json:"DatabasePath"`
 }
@@ -30,21 +33,21 @@ const (
 )
 
 // Init runs all steps of configuration including printing some messages to the terminal
-func Init() (ConfigurationParameters, *utils.Message, db.DataStorage, error) {
+func Init() (ConfigurationParameters, *utils.Message, db.DataStorage, *oauth2.Config, error) {
 	configFileLocation := flag.String("config", "./config.json", "Configuration File Location")
 	flag.Parse()
 	statikFS, err := fs.New()
 	if err != nil {
-		return ConfigurationParameters{}, nil, nil, err
+		return ConfigurationParameters{}, nil, nil, nil, err
 	}
 
 	messages, err := initLocales(statikFS)
 	if err != nil {
-		return ConfigurationParameters{}, nil, nil, err
+		return ConfigurationParameters{}, nil, nil, nil, err
 	}
 	messageFormaters, err := initLocaleFormatting(statikFS)
 	if err != nil {
-		return ConfigurationParameters{}, nil, nil, err
+		return ConfigurationParameters{}, nil, nil, nil, err
 	}
 
 	messagePack := &utils.Message{
@@ -56,14 +59,25 @@ func Init() (ConfigurationParameters, *utils.Message, db.DataStorage, error) {
 
 	configs, err := readConfig(*configFileLocation)
 	if err != nil {
-		return configs, messagePack, nil, err
+		return configs, messagePack, nil, nil, err
 	}
 	conn, err := bdb.NewBadgerDB(configs.DatabasePath)
 	if err != nil {
-		return configs, messagePack, conn, err
+		return configs, messagePack, conn, nil, err
 	}
 
-	return configs, messagePack, conn, nil
+	oauth2Config := &oauth2.Config{
+		RedirectURL:  "http://localhost:8080/api/callback",
+		ClientID:     configs.BotID,
+		ClientSecret: configs.BotSecret,
+		Scopes:       []string{"identify", "guilds"},
+		Endpoint: oauth2.Endpoint{
+			AuthURL:  "https://discordapp.com/api/oauth2/authorize",
+			TokenURL: "https://discordapp.com/api/oauth2/token",
+		},
+	}
+
+	return configs, messagePack, conn, oauth2Config, nil
 }
 
 // readConfig function reads from the json file and stores the values

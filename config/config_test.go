@@ -10,6 +10,8 @@ var (
 		MoverBotToken: "MoverBotToken",
 		PowerupTokens: []string{"servantToken1", "servantToken2"},
 		BotPrefix:     "-c",
+		BotID:         "get it here : discordapp.com/developers/applications/",
+		BotSecret:     "get it here : discordapp.com/developers/applications/",
 		DatabasePath:  "./databases/",
 	}
 )
@@ -25,7 +27,7 @@ func TestConfRead(t *testing.T) {
 			t.Errorf("Powerup Tokens do not match")
 		}
 	}
-	if conf.BotPrefix == testConfig.BotPrefix && conf.MoverBotToken == testConfig.MoverBotToken && conf.DatabasePath == conf.DatabasePath {
+	if conf.BotPrefix == testConfig.BotPrefix && conf.MoverBotToken == testConfig.MoverBotToken && conf.DatabasePath == conf.DatabasePath && conf.BotSecret == testConfig.BotSecret && conf.BotID == testConfig.BotID {
 		return
 	}
 	t.Errorf("String parameters not matching")

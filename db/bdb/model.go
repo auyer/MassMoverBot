@@ -9,6 +9,7 @@ import (
 	"github.com/dgraph-io/badger"
 )
 
+// BadgerDB struct stores a connection to a Badger embedded database
 type BadgerDB struct {
 	conn *badger.DB
 }
@@ -28,7 +29,7 @@ func initDB(DatabasePath string) (*badger.DB, error) {
 	return conn, nil
 }
 
-// NewBadgerDB ...
+// NewBadgerDB creates connection to a Badger Database
 func NewBadgerDB(path string) (*BadgerDB, error) {
 	conn, err := initDB(path)
 	bDB := &BadgerDB{
@@ -52,7 +53,7 @@ func NewBadgerDB(path string) (*BadgerDB, error) {
 	return bDB, err
 }
 
-// GetStatistics ...
+// GetStatistics retrieves a statistics object in the Database
 func (b *BadgerDB) GetStatistics() (map[string]int, error) {
 	bytesStats, err := GetDataTupleBytes(b.conn, "statistics")
 	if err != nil {
@@ -66,7 +67,7 @@ func (b *BadgerDB) GetStatistics() (map[string]int, error) {
 	return stats, nil
 }
 
-// SetStatistics ...
+// SetStatistics creates/updates a statistics object in the Database
 func (b *BadgerDB) SetStatistics(stats map[string]int) error {
 	bytesStats, err := json.Marshal(stats)
 	if err != nil {
@@ -76,7 +77,7 @@ func (b *BadgerDB) SetStatistics(stats map[string]int) error {
 
 }
 
-// WasWelcomeMessageSent ...
+// WasWelcomeMessageSent retrieves the status for a sent message
 func (b *BadgerDB) WasWelcomeMessageSent(id string) (bool, error) {
 	val, err := GetDataTuple(b.conn, "M:"+id)
 	if val == "1" {
@@ -85,7 +86,7 @@ func (b *BadgerDB) WasWelcomeMessageSent(id string) (bool, error) {
 	return false, err
 }
 
-// SetWelcomeMessageSent ...
+// SetWelcomeMessageSent sets a status for a "was message sent" to True
 func (b *BadgerDB) SetWelcomeMessageSent(id string, value bool) error {
 	binValue := "1"
 	if !value {
@@ -94,17 +95,17 @@ func (b *BadgerDB) SetWelcomeMessageSent(id string, value bool) error {
 	return UpdateDataTuple(b.conn, "M:"+id, binValue)
 }
 
-// GetGuildLang
+// GetGuildLang retrieves a Language entry in the database
 func (b *BadgerDB) GetGuildLang(id string) (string, error) {
 	return GetDataTuple(b.conn, id)
 }
 
-// SetGuildLang ...
+// SetGuildLang creates/updates a Language entry in the database
 func (b *BadgerDB) SetGuildLang(id, value string) error {
 	return UpdateDataTuple(b.conn, id, value)
 }
 
-// DeleteGuildLang ...
+// DeleteGuildLang deletes a Language entry in the database
 func (b *BadgerDB) DeleteGuildLang(id string) error {
 	return DeleteDataTuple(b.conn, id)
 }

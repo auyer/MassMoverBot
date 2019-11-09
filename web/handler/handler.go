@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"crypto/rand"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -40,25 +41,50 @@ type Handler struct {
 	Service          service.Bot
 }
 
-// NewHandler function initializes the Handler struct with the provided configs, and also a random state string
-func NewHandler(oauthConfig *oauth2.Config, service service.Bot) *Handler {
-	// Note : to scale this server into multiple instances, the State must be retrieved from the environment
-	c := 50
-	b := make([]byte, c)
+// GenerateRandomBytes returns securely generated random bytes.
+// It will return an error if the system's secure random
+// number generator fails to function correctly, in which
+// case the caller should not continue.
+func GenerateRandomBytes(n int) ([]byte, error) {
+	b := make([]byte, n)
 	_, err := rand.Read(b)
+	// Note that err == nil only if we read len(b) bytes.
 	if err != nil {
-		log.Fatal("Error creating random session identifier.", err)
+		return nil, err
 	}
-	mySigningKey = make([]byte, c)
-	_, err = rand.Read(mySigningKey)
+
+	return b, nil
+}
+
+// GenerateRandomString returns a URL-safe, base64 encoded
+// securely generated random string.
+func GenerateRandomString(s int) (string, error) {
+	b, err := GenerateRandomBytes(s)
+	return base64.URLEncoding.EncodeToString(b), err
+}
+
+// NewHandler function initializes the Handler struct with the provided configs, and also a random state string
+func NewHandler(oauthConfig *oauth2.Config, service service.Bot) (*Handler, error) {
+	// Note : to scale this server into multiple instances, the State must be retrieved from the environment
+
+	// State
+	state, err := GenerateRandomString(20)
 	if err != nil {
-		log.Fatal("Error creating random SIGNING KEY.", err)
+		return nil, err
 	}
+
+	// Signing Key
+	c := 256
+	mySigningKey, err = GenerateRandomBytes(c)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Handler{
 		Service:          service,
 		OauthConfig:      oauthConfig,
-		OauthStateString: string(b),
-	}
+		OauthStateString: state,
+	}, nil
 }
 
 // Login handler redirects the user to the Login URL

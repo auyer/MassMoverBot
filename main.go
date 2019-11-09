@@ -15,21 +15,25 @@ import (
 )
 
 func main() {
-	config, messages, conn, oauthConfig, err := config.Init()
+	botConfig, messages, conn, oauthConfig, err := config.Init()
 	if err != nil {
 		return
 	}
 
-	moverBot := bot.Init(config, messages, conn)
+	moverBot := bot.Init(botConfig, messages, conn)
 	err = moverBot.Start()
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer moverBot.Close()
 
-	webHandler := handler.NewHandler(oauthConfig, moverBot)
+	webHandler, err := handler.NewHandler(oauthConfig, moverBot)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
 
-	go web.Run(webHandler, ":80")
+	go web.Run(webHandler, ":8080")
 
 	quit := make(chan os.Signal)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)

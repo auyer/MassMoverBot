@@ -50,9 +50,38 @@ func (bot *Bot) GetGuild(guildID string) *discordgo.Guild {
 
 	guild, err := bot.MoverSession.Guild(guildID)
 	if err != nil {
-		log.Println("Failed to get server")
+		log.Println("Failed to get guild")
 	}
 
 	return guild //&SimpleGuild{guild.ID, guild.Name, "", guild.MemberCount}
 	// return guild
+}
+
+func (bot *Bot) GetGuildVoiceChannels(guildID string) []*service.Channel {
+	guild, err := bot.MoverSession.Guild(guildID)
+	if err != nil {
+		log.Println("Failed to get guild")
+	}
+
+	chans := map[string]*service.Channel{}
+	for _, channel := range guild.Channels {
+		// chacks if channel is of type Guild Voice
+		if channel.Type == 2 {
+			chans[channel.ID] = &service.Channel{ID: channel.ID, Name: channel.Name, Position: channel.Position, Users: []*service.User{}}
+		}
+	}
+	for _, member := range guild.VoiceStates {
+		user, err := bot.MoverSession.User(member.UserID)
+		if err != nil {
+			log.Println("Failed to read user")
+		}
+		chans[member.ChannelID].Users = append(chans[member.ChannelID].Users, &service.User{ID: user.ID, Username: user.Username})
+	}
+
+	serviceChans := []*service.Channel{}
+	for _, value := range chans {
+		serviceChans = append(serviceChans, value)
+	}
+
+	return serviceChans
 }

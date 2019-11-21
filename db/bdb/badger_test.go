@@ -18,7 +18,7 @@ func TestDatabase(t *testing.T) {
 			t.Fatal("Unable to clean Test Database Before testing. Check for permissions.")
 		}
 	}
-	database, err := ConnectDB(dbPath)
+	database, err := connectDB(dbPath)
 	if err != nil {
 		t.Errorf("Unable to Init Database")
 	}

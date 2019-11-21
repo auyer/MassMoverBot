@@ -12,8 +12,8 @@ type DataTuple struct {
 	Value string `json:"Value"`
 }
 
-// ConnectDB manages the database connection and configuration.
-func ConnectDB(databasePath string) (*badger.DB, error) {
+// connectDB manages the database connection and configuration.
+func connectDB(databasePath string) (*badger.DB, error) {
 	opts := badger.DefaultOptions
 	opts.Dir = databasePath
 	opts.ValueDir = databasePath

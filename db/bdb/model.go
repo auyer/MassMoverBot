@@ -20,7 +20,7 @@ func initDB(DatabasePath string) (*badger.DB, error) {
 		return nil, err
 	}
 
-	conn, err := ConnectDB(DatabasePath + "/db")
+	conn, err := connectDB(DatabasePath + "/db")
 	if err != nil {
 		log.Println("Error creating guildDB " + err.Error())
 		return nil, err

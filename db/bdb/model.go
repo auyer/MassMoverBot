@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/dgraph-io/badger"
+	badger "github.com/dgraph-io/badger/v2"
 )
 
 type BadgerDB struct {

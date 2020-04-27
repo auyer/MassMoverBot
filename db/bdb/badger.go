@@ -3,7 +3,7 @@
 package bdb
 
 import (
-	"github.com/dgraph-io/badger"
+	badger "github.com/dgraph-io/badger/v2"
 )
 
 // DataTuple structure stores the DataTuples for the bot.
@@ -14,9 +14,7 @@ type DataTuple struct {
 
 // connectDB manages the database connection and configuration.
 func connectDB(databasePath string) (*badger.DB, error) {
-	opts := badger.DefaultOptions
-	opts.Dir = databasePath
-	opts.ValueDir = databasePath
+	opts := badger.DefaultOptions(databasePath)
 	db, err := badger.Open(opts)
 	if err != nil {
 		return nil, err

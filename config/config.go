@@ -8,11 +8,10 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/auyer/massmoverbot/db"
+	"github.com/auyer/massmoverbot/db/bdb"
 	"github.com/auyer/massmoverbot/utils"
-	"github.com/dgraph-io/badger"
 	"github.com/rakyll/statik/fs"
 	"gopkg.in/yaml.v3"
 )
@@ -26,12 +25,12 @@ type ConfigurationParameters struct {
 }
 
 const (
-	version = "1.0"
+	version = "1.1.0"
 	website = "github.com/auyer/massmoverbot/"
 )
 
 // Init runs all steps of configuration including printing some messages to the terminal
-func Init() (ConfigurationParameters, *utils.Message, *badger.DB, error) {
+func Init() (ConfigurationParameters, *utils.Message, db.DataStorage, error) {
 	configFileLocation := flag.String("config", "./config.json", "Configuration File Location")
 	flag.Parse()
 	statikFS, err := fs.New()
@@ -59,8 +58,7 @@ func Init() (ConfigurationParameters, *utils.Message, *badger.DB, error) {
 	if err != nil {
 		return configs, messagePack, nil, err
 	}
-
-	conn, err := initDB(configs.DatabasePath)
+	conn, err := bdb.NewBadgerDB(configs.DatabasePath)
 	if err != nil {
 		return configs, messagePack, conn, err
 	}
@@ -90,46 +88,6 @@ func readConfig(configPath string) (ConfigurationParameters, error) {
 	}
 
 	return config, nil
-}
-
-func initDB(DatabasePath string) (*badger.DB, error) {
-	err := os.Mkdir(DatabasePath, os.ModePerm)
-	if err != nil && !os.IsExist(err) {
-		log.Println("Error creating Databases folder: ", err)
-		return nil, err
-	}
-
-	conn, err := db.ConnectDB(DatabasePath + "/db")
-	if err != nil {
-		log.Println("Error creating guildDB " + err.Error())
-		return nil, err
-	}
-
-	bytesStats, err := db.GetDataTupleBytes(conn, "statistics")
-	stats := map[string]int{}
-	if err != nil {
-		if err.Error() != "Key not found" {
-			log.Println("Error reading guildDB " + err.Error())
-			return conn, err
-		}
-
-		log.Println("Failed to get Statistics")
-		stats["usrs"] = 0
-		stats["movs"] = 0
-		bytesStats, _ = json.Marshal(stats)
-		_ = db.UpdateDataTupleBytes(conn, "statistics", bytesStats)
-	}
-
-	// stats := map[string]string{}
-	err = json.Unmarshal(bytesStats, &stats)
-	if err != nil {
-		log.Println("Failed to decode Statistics")
-		return conn, err
-	}
-
-	log.Println(fmt.Sprintf("Moved %d players in %d actions", stats["usrs"], stats["movs"]))
-
-	return conn, nil
 }
 
 func initLocales(statikFS http.FileSystem) (map[string]map[string]string, error) {

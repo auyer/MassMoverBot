@@ -15,7 +15,7 @@ func (bot *Bot) Summon(m *discordgo.MessageCreate, params []string) (string, err
 	workerschann := make(chan []*discordgo.Session, 1)
 	go utils.DetectPowerups(m.GuildID, append(bot.PowerupSessions, bot.MoverSession), workerschann)
 
-	guild, err := bot.MoverSession.Guild(m.GuildID) // retrieving the server (guild) the message was originated from
+	guild, err := bot.MoverSession.State.Guild(m.GuildID) // retrieving the server (guild) the message was originated from
 	if err != nil {
 		log.Println(err)
 		_, _ = bot.MoverSession.ChannelMessageSendEmbed(m.ChannelID, bot.Messages.NotInGuild(bot.GetGuildLocale(m.GuildID), m.Author.Mention()))

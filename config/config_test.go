@@ -8,8 +8,8 @@ var (
 	testConfigPath = "../config.model.json"
 	testConfig     = ConfigurationParameters{
 		MoverBotToken: "MoverBotToken",
-		PowerupTokens: []string{"servantToken1", "servantToken2"},
-		BotPrefix:     "-c",
+		PowerupTokens: []string{"powerupToken1", "powerupToken2"},
+		BotPrefix:     "-",
 		DatabasePath:  "./databases/",
 	}
 )

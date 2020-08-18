@@ -84,7 +84,7 @@ func (bot *Bot) Start() error {
 		log.Println("Error setting up main session: ", err)
 		return err
 	}
-
+	commander.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsGuilds | discordgo.IntentsGuildMessages)
 	commander.AddHandler(bot.guildCreate)
 	commander.AddHandler(bot.guildDelete)
 	commander.AddHandler(bot.messageHandler)
@@ -108,6 +108,7 @@ func (bot *Bot) Start() error {
 			log.Println("Error setting powerup session: ", err)
 			continue
 		}
+		powerup.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsGuilds)
 
 		err = powerup.Open()
 		if err != nil {

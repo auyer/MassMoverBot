@@ -84,7 +84,9 @@ func (bot *Bot) Start() error {
 		log.Println("Error setting up main session: ", err)
 		return err
 	}
-	commander.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsGuilds | discordgo.IntentsGuildMessages)
+	commander.Identify.Intents = discordgo.MakeIntent(
+		discordgo.IntentsGuilds | discordgo.IntentsGuildMessages |
+			discordgo.IntentsGuildMembers | discordgo.IntentsGuildVoiceStates)
 	commander.AddHandler(bot.guildCreate)
 	commander.AddHandler(bot.guildDelete)
 	commander.AddHandler(bot.messageHandler)
@@ -150,7 +152,10 @@ func (bot *Bot) ready(s *discordgo.Session, event *discordgo.Ready) {
 		s.UpdateStatus(0, bot.Prefix+" help")
 		return
 	}
-	_ = s.UpdateStatus(0, fmt.Sprintf("Moved %d players \n ! %s help", stats["usrs"], bot.Prefix))
+	// s.UpdateListeningStatus
+	// s.UpdateStreamingStatus(0, fmt.Sprintf("Moved %d players \n ! %s help", stats["usrs"], bot.Prefix), "https://massmover.github.io")
+	s.UpdateStatusComplex(discordgo.UpdateStatusData{Game: &discordgo.Game{Name: "Moved \n test \n tetest", Type: discordgo.GameTypeGame, URL: "https://massmover.github.io", Details: fmt.Sprintf("Moved %d players \n ! %s help", stats["usrs"], bot.Prefix)}, Status: fmt.Sprintf("Moved %d players \n ! %s help", stats["usrs"], bot.Prefix)})
+	// _ = s.UpdateStatus(0, fmt.Sprintf("Moved %d players \n ! %s help", stats["usrs"], bot.Prefix))
 }
 
 // bumpStatistics adds 1 to the "movs" stats and 'moved' to the "movd"

@@ -3,19 +3,19 @@ LANG:
   WelcomeAndLang: |
     :flag_us: [EN] Hi ! Thank you for adding this bot.
         Set the language used by the bot in guild's by typing \'%s lang\' and chosing one of the options.
-        Visit the website and add more moving power! http://massmover.github.io
+        Visit the website and add more moving power! https://massmover.github.io 
 
     :flag_br: [PT/BR] Olá ! Obrigado por adicionar este bot.
         Configure a linguagem em sua guild digitando \'%s lang\' e escolhendo uma das opçoes.
-        Visite o site e adicione mais níveis de poder! http://massmover.github.io
+        Visite o site e adicione mais níveis de poder! https://massmover.github.io 
 
     :flag_es: [ES] Hola ! Gracias por añadir este bot.
         Configure el idioma de preferencia escribiendo \'%s lang\' y escogiendo una de las opciones.
-        Visite la página y añada más poder de movimiento! http://massmover.github.io 
+        Visite la página y añada más poder de movimiento! https://massmover.github.io  
 
     :flag_fr: [FR] Salut ! Merci d'avoir ajouté ce bot.
         Choisis le language de ta guilde en utilisant la commande \'%s lang\' et en choisissant une des options.
-        Visite le site afin de déplacer, toujours plus ! http://massmover.github.io
+        Visite le site afin de déplacer, toujours plus ! https://massmover.github.io 
   LangSetupMessage: |
     1 - :flag_us: [EN] Type \'%s lang\' followed by \'EN\' or \'1\' to select the English language
 

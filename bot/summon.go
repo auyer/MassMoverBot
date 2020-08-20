@@ -19,7 +19,7 @@ func (bot *Bot) Summon(m *discordgo.MessageCreate, params []string) (string, err
 	if err != nil {
 		log.Println(err)
 		_, _ = bot.MoverSession.ChannelMessageSendEmbed(m.ChannelID, bot.Messages.NotInGuild(bot.GetGuildLocale(m.GuildID), m.Author.Mention()))
-		return "", errors.New("notinguild")
+		return "", errors.New("not in guild")
 	}
 
 	destination := utils.GetUserCurrentChannel(bot.MoverSession, m.Author.ID, guild)

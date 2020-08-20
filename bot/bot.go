@@ -152,10 +152,7 @@ func (bot *Bot) ready(s *discordgo.Session, event *discordgo.Ready) {
 		s.UpdateStatus(0, bot.Prefix+" help")
 		return
 	}
-	// s.UpdateListeningStatus
-	// s.UpdateStreamingStatus(0, fmt.Sprintf("Moved %d players \n ! %s help", stats["usrs"], bot.Prefix), "https://massmover.github.io")
-	s.UpdateStatusComplex(discordgo.UpdateStatusData{Game: &discordgo.Game{Name: "Moved \n test \n tetest", Type: discordgo.GameTypeGame, URL: "https://massmover.github.io", Details: fmt.Sprintf("Moved %d players \n ! %s help", stats["usrs"], bot.Prefix)}, Status: fmt.Sprintf("Moved %d players \n ! %s help", stats["usrs"], bot.Prefix)})
-	// _ = s.UpdateStatus(0, fmt.Sprintf("Moved %d players \n ! %s help", stats["usrs"], bot.Prefix))
+	_ = s.UpdateStatus(0, fmt.Sprintf("Moved %d players \n ! %s help", stats["usrs"], bot.Prefix))
 }
 
 // bumpStatistics adds 1 to the "movs" stats and 'moved' to the "movd"

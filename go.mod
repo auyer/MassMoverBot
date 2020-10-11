@@ -3,7 +3,7 @@ module github.com/auyer/massmoverbot
 go 1.14
 
 require (
-	github.com/bwmarrin/discordgo v0.20.3
+	github.com/bwmarrin/discordgo v0.22.0
 	github.com/dgraph-io/badger/v2 v2.0.3
 	github.com/dgraph-io/ristretto v0.0.2 // indirect
 	github.com/kr/pretty v0.2.0 // indirect

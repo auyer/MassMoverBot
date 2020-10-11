@@ -1,6 +1,6 @@
 {
     "MoverBotToken" : "MoverBotToken",
-    "PowerupTokens" : ["servantToken1", "servantToken2"],
-    "BotPrefix" : "-c",
+    "PowerupTokens" : ["powerupToken1", "powerupToken2"],
+    "BotPrefix" : "-",
     "DatabasePath" : "./databases/"
 }

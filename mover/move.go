@@ -130,7 +130,7 @@ Inputs:
 	retry int: the amount of retrys this function will allows
 */
 func MoveAndRetry(s *discordgo.Session, guildID, userID, dest string, retry int) error {
-	err := s.GuildMemberMove(guildID, userID, dest)
+	err := s.GuildMemberMove(guildID, userID, &dest)
 	if err != nil {
 		time.Sleep(time.Millisecond * 20)
 		if retry >= 0 {

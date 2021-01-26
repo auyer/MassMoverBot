@@ -100,8 +100,8 @@ Inputs:
 
 Outputs: True/False
 */
-func CheckPermissions(s *discordgo.Session, channelID string, userID string, permission int) bool {
-	userPermission, err := s.State.UserChannelPermissions(userID, channelID)
+func CheckPermissions(s *discordgo.Session, channelID string, userID string, permission int64) bool {
+	userPermission, err := s.UserChannelPermissions(userID, channelID)
 	if err != nil || (userPermission&permission) != permission {
 		return false
 	}
@@ -183,4 +183,24 @@ func HaveIAskedMember(s *discordgo.Session, member string) bool {
 		}
 	}
 	return false
+}
+
+// FormatNumberWithSeparators takes a positive number and ads commas in the appropriate separator places
+func FormatNumberWithSeparators(n int64) string {
+	in := strconv.FormatInt(n, 10)
+	numOfDigits := len(in)
+	numOfCommas := (numOfDigits - 1) / 3
+
+	out := make([]byte, len(in)+numOfCommas)
+
+	for i, j, k := len(in)-1, len(out)-1, 0; ; i, j = i-1, j-1 {
+		out[j] = in[i]
+		if i == 0 {
+			return string(out)
+		}
+		if k++; k == 3 {
+			j, k = j-1, 0
+			out[j] = ','
+		}
+	}
 }

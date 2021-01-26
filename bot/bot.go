@@ -134,9 +134,9 @@ func (bot *Bot) Start() error {
 				if err != nil {
 					log.Println(err)
 				}
-				_ = bot.MoverSession.UpdateStatus(0, fmt.Sprintf("Moved %d players \n ! %s help", stats["usrs"], bot.Prefix))
+				bot.MoverSession.UpdateStatusComplex(discordgo.UpdateStatusData{Activities: []*discordgo.Activity{{Name: fmt.Sprintf("%s help | Moved %s players !", bot.Prefix, utils.FormatNumberWithSeparators(int64(stats["usrs"])))}}})
 				for _, powerupSession := range bot.PowerupSessions {
-					_ = powerupSession.UpdateStatus(0, fmt.Sprintf("Moved %d players \n ! %s help", stats["usrs"], bot.Prefix))
+					powerupSession.UpdateStatusComplex(discordgo.UpdateStatusData{Activities: []*discordgo.Activity{{Name: fmt.Sprintf("Moved %s players !", utils.FormatNumberWithSeparators(int64(stats["usrs"])))}}})
 				}
 			}
 		}
@@ -149,10 +149,10 @@ func (bot *Bot) ready(s *discordgo.Session, event *discordgo.Ready) {
 	stats, err := bot.DB.GetStatistics()
 	if err != nil {
 		log.Println("Failed to get Statistics", err)
-		s.UpdateStatus(0, bot.Prefix+" help")
+		s.UpdateStatusComplex(discordgo.UpdateStatusData{Activities: []*discordgo.Activity{{Name: bot.Prefix + " help"}}})
 		return
 	}
-	_ = s.UpdateStatus(0, fmt.Sprintf("Moved %d players \n ! %s help", stats["usrs"], bot.Prefix))
+	s.UpdateStatusComplex(discordgo.UpdateStatusData{Activities: []*discordgo.Activity{{Name: fmt.Sprintf("%s help | Moved %s players !", bot.Prefix, utils.FormatNumberWithSeparators(int64(stats["usrs"])))}}})
 }
 
 // bumpStatistics adds 1 to the "movs" stats and 'moved' to the "movd"

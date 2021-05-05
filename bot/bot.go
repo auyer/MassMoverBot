@@ -128,7 +128,7 @@ func (bot *Bot) Start() error {
 			select {
 			case <-bot.Closing:
 				log.Println("Halted Status Update")
-				break
+				return
 			case <-time.After(1200 * time.Second):
 				stats, err := bot.DB.GetStatistics()
 				if err != nil {
@@ -168,7 +168,6 @@ func (bot *Bot) bumpStatistics(moved string) {
 		log.Println(err)
 		log.Println(stats)
 	}
-	return
 }
 
 // GetGuildLocale function will return the language for a guild, returning EN by default.

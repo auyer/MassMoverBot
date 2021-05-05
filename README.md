@@ -51,7 +51,8 @@ The first one should be in the "MoverBotToken" slot in the config file.
 The rest will be the powerup Tokens, and should be added in a List.
 
 The Permission integer for the commander must be 16780288 (Move, Read messages, and Write messages)
-While the Powerups can be 16777216 since they dont send any messages
+While the Powerups can be 16777216 since they dont send any messages, but having the same 16780288 wont hurt.
+The bot also needs access to the **Server Members Intent**, so add it in the Bot menu.
 
 ## Installation
 You can get the lastest binary [here](https://github.com/auyer/massmoverbot/releases/latest).

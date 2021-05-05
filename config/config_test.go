@@ -25,7 +25,7 @@ func TestConfRead(t *testing.T) {
 			t.Errorf("Powerup Tokens do not match")
 		}
 	}
-	if conf.BotPrefix == testConfig.BotPrefix && conf.MoverBotToken == testConfig.MoverBotToken && conf.DatabasePath == conf.DatabasePath {
+	if conf.BotPrefix == testConfig.BotPrefix && conf.MoverBotToken == testConfig.MoverBotToken && testConfig.DatabasePath == conf.DatabasePath {
 		return
 	}
 	t.Errorf("String parameters not matching")

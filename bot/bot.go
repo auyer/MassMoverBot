@@ -1,10 +1,8 @@
 package bot
 
 import (
-	"fmt"
 	"log"
 	"regexp"
-	"strconv"
 	"time"
 
 	"github.com/auyer/massmoverbot/config"
@@ -130,13 +128,13 @@ func (bot *Bot) Start() error {
 				log.Println("Halted Status Update")
 				return
 			case <-time.After(1200 * time.Second):
-				stats, err := bot.DB.GetStatistics()
+				// stats, err := bot.DB.GetStatistics()
 				if err != nil {
 					log.Println(err)
 				}
-				bot.MoverSession.UpdateStatusComplex(discordgo.UpdateStatusData{Activities: []*discordgo.Activity{{Name: fmt.Sprintf("%s help | Moved %s players !", bot.Prefix, utils.FormatNumberWithSeparators(int64(stats["usrs"])))}}})
+				bot.MoverSession.UpdateStatusComplex(discordgo.UpdateStatusData{Activities: []*discordgo.Activity{{Name: "Get the new bot here: http://massmover.github.io/"}}})
 				for _, powerupSession := range bot.PowerupSessions {
-					powerupSession.UpdateStatusComplex(discordgo.UpdateStatusData{Activities: []*discordgo.Activity{{Name: fmt.Sprintf("Moved %s players !", utils.FormatNumberWithSeparators(int64(stats["usrs"])))}}})
+					powerupSession.UpdateStatusComplex(discordgo.UpdateStatusData{Activities: []*discordgo.Activity{{Name: "Get the new bot here: http://massmover.github.io/"}}})
 				}
 			}
 		}
@@ -146,28 +144,28 @@ func (bot *Bot) Start() error {
 
 func (bot *Bot) ready(s *discordgo.Session, event *discordgo.Ready) {
 	// Set the playing status.
-	stats, err := bot.DB.GetStatistics()
-	if err != nil {
-		log.Println("Failed to get Statistics", err)
-		s.UpdateStatusComplex(discordgo.UpdateStatusData{Activities: []*discordgo.Activity{{Name: bot.Prefix + " help"}}})
-		return
-	}
-	s.UpdateStatusComplex(discordgo.UpdateStatusData{Activities: []*discordgo.Activity{{Name: fmt.Sprintf("%s help | Moved %s players !", bot.Prefix, utils.FormatNumberWithSeparators(int64(stats["usrs"])))}}})
+	// stats, err := bot.DB.GetStatistics()
+	// if err != nil {
+	// 	log.Println("Failed to get Statistics", err)
+	// 	s.UpdateStatusComplex(discordgo.UpdateStatusData{Activities: []*discordgo.Activity{{Name: bot.Prefix + " help"}}})
+	// 	return
+	// }
+	s.UpdateStatusComplex(discordgo.UpdateStatusData{Activities: []*discordgo.Activity{{Name: "Get the new bot here: http://massmover.github.io/"}}})
 }
 
 // bumpStatistics adds 1 to the "movs" stats and 'moved' to the "movd"
 func (bot *Bot) bumpStatistics(moved string) {
-	stats, err := bot.DB.GetStatistics()
-	if err != nil {
-		log.Println(err)
-	}
-	movedInt, _ := strconv.Atoi(moved)
-	stats["usrs"] += movedInt
-	err = bot.DB.SetStatistics(stats)
-	if err != nil {
-		log.Println(err)
-		log.Println(stats)
-	}
+	// stats, err := bot.DB.GetStatistics()
+	// if err != nil {
+	// 	log.Println(err)
+	// }
+	// movedInt, _ := strconv.Atoi(moved)
+	// stats["usrs"] += movedInt
+	// err = bot.DB.SetStatistics(stats)
+	// if err != nil {
+	// 	log.Println(err)
+	// 	log.Println(stats)
+	// }
 }
 
 // GetGuildLocale function will return the language for a guild, returning EN by default.

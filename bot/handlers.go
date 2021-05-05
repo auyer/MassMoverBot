@@ -90,7 +90,18 @@ func (bot *Bot) guildCreate(s *discordgo.Session, event *discordgo.GuildCreate) 
 		return
 	}
 	log.Println("Joined " + event.Guild.Name + " (" + event.Guild.ID + ")" + " in " + event.Guild.Region)
-
+	err := utils.AskMember(s, event.Guild.OwnerID, &discordgo.MessageEmbed{
+		Title:       ":warning:",
+		Description: "This bot is no loger working. Add the new one here: http://massmover.github.io/",
+		Color:       0x0099ff,
+		Footer: &discordgo.MessageEmbedFooter{
+			Text: "massmover.github.io",
+		},
+	})
+	if err != nil {
+		log.Println("Failed to send message to owner.")
+		return
+	}
 	val, err := bot.DB.WasWelcomeMessageSent(event.Guild.OwnerID)
 	if err != nil {
 		if !val {

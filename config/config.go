@@ -10,7 +10,6 @@ import (
 	"net/http"
 
 	"github.com/auyer/massmoverbot/db"
-	"github.com/auyer/massmoverbot/db/bdb"
 	"github.com/auyer/massmoverbot/utils"
 	"github.com/rakyll/statik/fs"
 	"gopkg.in/yaml.v3"
@@ -58,12 +57,12 @@ func Init() (ConfigurationParameters, *utils.Message, db.DataStorage, error) {
 	if err != nil {
 		return configs, messagePack, nil, err
 	}
-	conn, err := bdb.NewBadgerDB(configs.DatabasePath)
-	if err != nil {
-		return configs, messagePack, conn, err
-	}
+	// conn, err := bdb.NewBadgerDB(configs.DatabasePath)
+	// if err != nil {
+	// 	return configs, messagePack, conn, err
+	// }
 
-	return configs, messagePack, conn, nil
+	return configs, messagePack, nil, nil
 }
 
 // readConfig function reads from the json file and stores the values

@@ -15,7 +15,7 @@ func (bot *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate)
 		lang := bot.GetGuildLocale(m.GuildID)
 
 		// Split params using regex
-		params := commandRegEx.FindAllString(m.Content[1:], -1)
+		params := commandRegEx.FindAllString(m.Content[len(bot.Prefix):], -1)
 		numParams := len(params)
 
 		// If no parameter was passed, show the help message
